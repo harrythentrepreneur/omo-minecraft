@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Omo Mission Control — A world that builds itself</title>
+<meta name="description" content="Say one sentence. Watch a whole AI company build itself — block by block — right in front of you." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ───────── Cinematic: premium near-black launch page with motion ───────── */
+  :root{
+    --bg:#07080B; --panel:#0E1016; --panel2:#13161E; --line:#222734;
+    --ink:#EEF1F6; --ink-soft:#99A3B4;
+    --diamond:#46E3FF; --emerald:#37E08B; --violet:#9A86FF; --gold:#FFCB45; --redstone:#FF5A52;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink); overflow-x:hidden;
+    font-family:'Inter',system-ui,sans-serif; font-size:19px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* animated aurora background */
+  body::before{
+    content:""; position:fixed; inset:-30% -10% auto -10%; height:140vh; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(40% 35% at 18% 12%, rgba(70,227,255,.16), transparent 60%),
+      radial-gradient(38% 32% at 82% 8%, rgba(154,134,255,.16), transparent 60%),
+      radial-gradient(46% 40% at 60% 70%, rgba(55,224,139,.10), transparent 60%);
+    filter:blur(20px); animation:aurora 18s ease-in-out infinite alternate;
+  }
+  @keyframes aurora{ 0%{transform:translate3d(-2%,-1%,0) scale(1);} 100%{transform:translate3d(3%,2%,0) scale(1.12);} }
+  img{display:block; width:100%;}
+  a{color:var(--diamond); text-decoration:none; font-weight:600;}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 26px; position:relative; z-index:1;}
+  section{padding:96px 0; position:relative; z-index:1;}
+  .pix{font-family:'Press Start 2P',monospace;}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif; font-weight:700; letter-spacing:-.02em; line-height:1.06;}
+  h2{font-size:clamp(30px,4.6vw,50px); margin:0 0 18px;}
+  h3{font-size:23px; margin:0 0 8px;}
+  .eyebrow{font-family:'Press Start 2P',monospace; font-size:10px; letter-spacing:1.5px; color:var(--diamond);
+           margin:0 0 20px; text-shadow:0 0 18px rgba(70,227,255,.5);}
+  .lead{font-size:21px; color:var(--ink-soft); max-width:62ch;}
+  .center{text-align:center;} .center .lead{margin-left:auto;margin-right:auto;}
+  .grad{background:linear-gradient(100deg,#fff 10%, var(--diamond) 45%, var(--violet) 80%);
+        -webkit-background-clip:text; background-clip:text; color:transparent;}
+
+  /* sticky nav */
+  .nav{position:fixed; top:0; left:0; right:0; z-index:90; display:flex; align-items:center; justify-content:space-between;
+    padding:14px 26px; background:rgba(7,8,11,.6); backdrop-filter:blur(12px); border-bottom:1px solid var(--line);}
+  .nav .wm{font-family:'Press Start 2P',monospace; font-size:12px; color:#fff;}
+  .nav .wm b{color:var(--diamond);}
+  .switch{display:flex; gap:3px; align-items:center; font-family:'Press Start 2P',monospace; font-size:8px;}
+  .switch a{color:var(--ink-soft); padding:8px 9px; border-radius:8px;}
+  .switch a:hover{color:#fff; background:rgba(255,255,255,.06);}
+  .switch a.on{color:#06262a; background:var(--diamond);}
+
+  /* buttons */
+  .btn{display:inline-block; font-weight:700; font-size:16px; padding:15px 26px; border-radius:12px; margin:6px;
+    transition:transform .08s, box-shadow .2s, filter .2s; cursor:pointer; border:0;}
+  .btn.go{background:linear-gradient(180deg,#5ff0a6,var(--emerald)); color:#04210f;
+    box-shadow:0 0 0 1px rgba(55,224,139,.5), 0 8px 30px rgba(55,224,139,.28);}
+  .btn.ice{background:rgba(255,255,255,.05); color:#fff; border:1px solid var(--line);}
+  .btn:hover{transform:translateY(-2px); filter:brightness(1.06);}
+
+  /* image frame with hover zoom + glow */
+  .shot{position:relative; border-radius:16px; overflow:hidden; border:1px solid var(--line);
+    background:#0b0d12; box-shadow:0 30px 80px rgba(0,0,0,.55);}
+  .shot::after{content:""; position:absolute; inset:0; border-radius:16px; pointer-events:none;
+    box-shadow:inset 0 0 60px rgba(70,227,255,.06);}
+  .shot img{width:100%; height:100%; object-fit:cover; transition:transform .6s cubic-bezier(.2,.7,.2,1);}
+  .shot:hover img{transform:scale(1.045);}
+
+  /* hero */
+  .hero{padding:150px 0 60px; text-align:center;}
+  .hero h1{font-size:clamp(36px,6.2vw,72px); margin:16px auto 22px; max-width:15ch;}
+  .hero .lead{font-size:22px;}
+  .chips{display:flex; gap:9px; flex-wrap:wrap; justify-content:center; margin:28px 0 6px;}
+  .chip{font-family:'Press Start 2P',monospace; font-size:9px; color:var(--ink-soft);
+    background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:999px; padding:10px 13px;
+    animation:floaty 6s ease-in-out infinite;}
+  .chip:nth-child(2){animation-delay:.8s;} .chip:nth-child(3){animation-delay:1.6s;} .chip:nth-child(4){animation-delay:2.4s;}
+  @keyframes floaty{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+  .hero .shot{margin:46px auto 0; max-width:1000px;}
+
+  /* on-load entrance (staggered) */
+  .rise{opacity:0; transform:translateY(22px); animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards;}
+  .d1{animation-delay:.05s;} .d2{animation-delay:.18s;} .d3{animation-delay:.32s;} .d4{animation-delay:.46s;} .d5{animation-delay:.6s;}
+  @keyframes rise{ to{opacity:1; transform:none;} }
+
+  /* scroll reveal */
+  .reveal{opacity:0; transform:translateY(34px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1);}
+  .reveal.in{opacity:1; transform:none;}
+
+  /* layout */
+  .two{display:grid; grid-template-columns:1.05fr 1fr; gap:46px; align-items:center;}
+  .panel{background:linear-gradient(180deg,var(--panel2),var(--panel)); border:1px solid var(--line);
+    border-radius:16px; padding:28px; transition:transform .25s, border-color .25s;}
+  .panel:hover{transform:translateY(-4px); border-color:#33394a;}
+  .grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .step .shot{aspect-ratio:1/1;}
+  .step .num{font-family:'Press Start 2P',monospace; font-size:10px; color:var(--diamond); margin:16px 0 6px;}
+  .step p{color:var(--ink-soft); font-size:17px; margin:0;}
+  .law .ic{font-size:26px; color:var(--diamond);} .law h3{color:#fff;} .law p{color:var(--ink-soft); font-size:17px; margin:6px 0 0;}
+  .cmd{font-family:'Press Start 2P',monospace; font-size:12px; color:var(--diamond);
+    background:#07242a; border:1px solid #16424b; border-radius:8px; padding:7px 11px;}
+
+  .pull{font-family:'Press Start 2P',monospace; font-size:clamp(14px,2.2vw,20px); line-height:1.7;
+    background:linear-gradient(100deg,var(--gold),#ffe29a); -webkit-background-clip:text; background-clip:text; color:transparent;}
+
+  footer{border-top:1px solid var(--line); text-align:center; padding:50px 26px; color:var(--ink-soft); position:relative; z-index:1;}
+  footer .wm{font-family:'Press Start 2P',monospace; font-size:13px; color:#fff;}
+
+  @media(max-width:860px){ .grid4{grid-template-columns:1fr 1fr;} .grid3{grid-template-columns:1fr;} .two{grid-template-columns:1fr;} .switch{display:none;} }
+  @media(max-width:520px){ .grid4{grid-template-columns:1fr;} }
+  @media(prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} .rise,.reveal{opacity:1; transform:none;} }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="wm">OMO<b>·</b>MC</span>
+  <div class="switch">
+    <a href="index.html">Classic</a>
+    <a href="light.html">Daylight</a>
+    <a class="on" href="cinematic.html">Cinematic</a>
+    <a href="terminal.html">Terminal</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow rise d1">▸ FOR BUILDERS DEPLOYING FLEETS OF AI AGENTS — AND FLYING BLIND</p>
+    <h1 class="rise d2">Say one sentence. Watch a whole <span class="grad">AI company build itself.</span></h1>
+    <p class="lead center rise d3">Omo Mission Control turns your autonomous AI org into a <b>place you walk through.</b>
+       Drop a glowing HQ anywhere. Speak a goal. A new wing rises out of the ground, an agent walks in, and the wall
+       lights up with a <b>live dashboard of your real data</b> — updating as it works.</p>
+    <div class="rise d4" style="margin-top:28px;">
+      <a class="btn go" href="#mechanism">See how it works</a>
+      <a class="btn ice" href="#demo">Watch it build →</a>
+    </div>
+    <div class="chips rise d5">
+      <span class="chip">⛏ Vanilla Minecraft</span>
+      <span class="chip">◆ Gemini brain</span>
+      <span class="chip">◆ ADK org</span>
+      <span class="chip">◆ MCP tools</span>
+    </div>
+    <div class="shot rise d5"><img src="images/hero.png" alt="Glowing circular alien HQ on a Minecraft hillside" /></div>
+  </div>
+</header>
+
+<!-- PROBLEM -->
+<section>
+  <div class="wrap two reveal">
+    <div>
+      <p class="eyebrow" style="color:var(--redstone); text-shadow:0 0 18px rgba(255,90,82,.4);">THE BLACK-BOX PROBLEM</p>
+      <h2>You hired a robot army you can't see.</h2>
+      <p class="lead">Your agents are invisible. You can't watch them think. You can't steer them mid-task.
+         And every new capability means a developer pre-wiring <i>another</i> agent, <i>another</i> integration,
+         <i>another</i> dashboard.</p>
+      <p class="lead" style="margin-top:14px;">The “autonomous workforce” you were promised feels neither autonomous
+         nor like a workforce. It's a chat box bolted to a black box.</p>
+    </div>
+    <div class="shot" style="aspect-ratio:4/3;"><img src="images/blackbox.png" alt="A lone player facing a black box" /></div>
+  </div>
+</section>
+
+<!-- MECHANISM -->
+<section id="mechanism">
+  <div class="wrap center reveal">
+    <p class="eyebrow">THE MECHANISM — HERE'S THE WHOLE TRICK</p>
+    <h2>So we made the org a <span class="grad">place</span> — and let it build itself.</h2>
+    <p class="lead center" style="margin-bottom:42px;">If the world <b>is</b> the org, then scaling your team is something
+       you can finally <i>watch happen.</i> Four moves:</p>
+    <div class="grid4" style="text-align:left;">
+      <div class="step reveal">
+        <div class="shot"><img src="images/step-speak.png" alt="Speak a goal" /></div>
+        <div class="num">01 · SPEAK</div><h3>Just say it.</h3>
+        <p>Walk up to your Chief of Staff: <i>“Check whether our ad spend is still paying off — and keep watch.”</i></p>
+      </div>
+      <div class="step reveal" style="transition-delay:.1s;">
+        <div class="shot"><img src="images/step-rises.png" alt="The world rises" /></div>
+        <div class="num">02 · IT BUILDS</div><h3>The world rises.</h3>
+        <p>It thinks out loud, spots a missing function, and a new wing climbs out of the ground — block by block, live.</p>
+      </div>
+      <div class="step reveal" style="transition-delay:.2s;">
+        <div class="shot"><img src="images/step-staff.png" alt="An agent walks in" /></div>
+        <div class="num">03 · IT STAFFS</div><h3>An agent walks in.</h3>
+        <p>A brand-new Gemini agent walks through the door and sits down — wired instantly to exactly the tools it needs.</p>
+      </div>
+      <div class="step reveal" style="transition-delay:.3s;">
+        <div class="shot"><img src="images/step-dashboard.png" alt="The wall lights up" /></div>
+        <div class="num">04 · IT LIGHTS UP</div><h3>The wall comes alive.</h3>
+        <p>The far wall is a gorgeous live dashboard of your real numbers — redrawing as it pulls fresh data.</p>
+      </div>
+    </div>
+    <p class="reveal" style="margin-top:36px; font-size:19px;">Then just steer it:
+       <span class="cmd">/revise show 7-day window, flag ROAS &lt; 2.0</span></p>
+  </div>
+</section>
+
+<!-- THREE LAWS -->
+<section>
+  <div class="wrap center reveal">
+    <p class="eyebrow">WHY IT FEELS LIKE MAGIC</p>
+    <h2>Three things no dashboard has ever given you.</h2>
+    <div class="grid3" style="text-align:left; margin-top:40px;">
+      <div class="panel law reveal"><div class="ic">◷</div><h3>It's all real-time.</h3>
+        <p>Three live streams at once: the agent <i>thinking</i>, the world <i>rising</i>, and your <i>data</i> updating — no reload.</p></div>
+      <div class="panel law reveal" style="transition-delay:.12s;"><div class="ic">✦</div><h3>Zero configuration.</h3>
+        <p>You state intent. The org builds the team, the rooms, and every tool connection itself. You never wire a thing.</p></div>
+      <div class="panel law reveal" style="transition-delay:.24s;"><div class="ic">✋</div><h3>You're always in control.</h3>
+        <p>Every email, budget change, or payment surfaces as <b>one tap to approve.</b> Walk in, talk, revise, veto — anytime.</p></div>
+    </div>
+    <div class="shot reveal" style="margin-top:30px; max-width:800px; margin-left:auto; margin-right:auto; aspect-ratio:16/9;">
+      <img src="images/approve.png" alt="Tap to approve gate" /></div>
+  </div>
+</section>
+
+<!-- VISION -->
+<section id="demo">
+  <div class="wrap center reveal">
+    <p class="eyebrow">THE ENDGAME</p>
+    <h2>The world is as big as the mission. <span class="grad">And it keeps growing.</span></h2>
+    <p class="lead center" style="margin-bottom:32px;">Ask for one more capability and another world rises. Then promote
+       any world into a standalone, visitable business — one people can walk into, spectate, and pay for. A whole skyline
+       of autonomous companies… each one a sentence you once spoke.</p>
+    <div class="shot"><img src="images/skyline.png" alt="A skyline of glowing Omo worlds" /></div>
+    <p class="pull" style="margin-top:46px;">“I configured none of this.”</p>
+    <p class="lead center" style="margin:10px auto 28px;">The org saw what it needed, built the room, hired the agent,
+       connected the tools, and shipped — <b>live.</b></p>
+    <a class="btn go" href="#">▶ Watch the 90-second demo</a>
+    <a class="btn ice" href="../docs/OMO_MISSION_CONTROL_PRD.md">Read the vision</a>
+  </div>
+</section>
+
+<footer>
+  <p class="wm">OMO MISSION CONTROL</p>
+  <p>A world that builds itself for autonomous AI teams.</p>
+  <p style="margin-top:12px;">Powered by <b style="color:var(--diamond)">Gemini</b> · Built on <b style="color:var(--diamond)">ADK</b> · Connected over <b style="color:var(--diamond)">MCP</b> · Runs in <b>vanilla Minecraft</b></p>
+  <p style="margin-top:8px; color:#5b6678;">Google for Startups AI Agents Challenge — Track 1 · Build</p>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:.14});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>

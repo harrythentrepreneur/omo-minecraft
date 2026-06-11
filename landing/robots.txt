@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# TODO on deploy: point this at your live domain
+Sitemap: https://omo.computer/sitemap.xml

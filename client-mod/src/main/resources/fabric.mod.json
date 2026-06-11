@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "agentcraft-terminal",
+  "version": "${version}",
+  "name": "Omo Terminal",
+  "description": "Real PTY-backed terminal rendered inside Minecraft. Open with backtick (`).",
+  "authors": ["Omo"],
+  "license": "All Rights Reserved",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.agentcraft.terminal.TerminalMod"]
+  },
+  "mixins": ["agentcraft-terminal.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.11",
+    "java": ">=21"
+  }
+}

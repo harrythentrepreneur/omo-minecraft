@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Omo · Live Dashboard</title>
+<style>
+  /* ── Omo "alien HUD" design system ──────────────────────────────────────
+     One self-contained file, zero external deps (renders reliably inside the
+     headless-Chrome cinema pipeline). Spec-driven: the Gemini agent supplies a
+     JSON `spec` (title/kpis/chart/table/feed); /revise just swaps the spec and
+     the board redraws live. The baked DEMO_SPEC below is the fallback so the
+     wall is gorgeous even before live data is wired. */
+  :root{
+    --bg:#04070c; --bg2:#070d16; --panel:rgba(13,24,38,.72); --panel-edge:rgba(80,210,255,.22);
+    --ink:#dbeeff; --ink-dim:#7fa6c4; --ink-faint:#48708e;
+    --accent:#39e6ff; --accent2:#7c7bff; --good:#39ffa6; --warn:#ffcf5a; --bad:#ff5d73;
+    --glow:0 0 18px rgba(57,230,255,.35); --grid:rgba(60,150,200,.07);
+    --mono:"SF Mono",ui-monospace,"Roboto Mono",Menlo,Consolas,monospace;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(1200px 700px at 78% -10%, rgba(124,123,255,.16), transparent 60%),
+      radial-gradient(900px 600px at 8% 110%, rgba(57,230,255,.12), transparent 55%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    color:var(--ink); font-family:var(--sans);
+    background-attachment:fixed; overflow:hidden;
+  }
+  body::before{ /* faint HUD grid */
+    content:""; position:fixed; inset:0; pointer-events:none;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:42px 42px; mask:radial-gradient(120% 100% at 50% 0%,#000 55%,transparent 100%);
+  }
+  .wrap{height:100%; display:flex; flex-direction:column; padding:26px 30px 22px; gap:18px}
+  /* ── header ── */
+  header{display:flex; align-items:center; gap:18px}
+  .mark{display:flex; align-items:center; gap:12px}
+  .glyph{width:38px;height:38px;border-radius:11px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    box-shadow:var(--glow); display:grid; place-items:center; color:#04111a; font-weight:800; font-size:20px}
+  .mark .t{font-size:12px;letter-spacing:.32em;color:var(--ink-dim);text-transform:uppercase}
+  .mark .h{font-size:21px;font-weight:700;letter-spacing:.01em}
+  .spacer{flex:1}
+  .live{display:flex;align-items:center;gap:9px;font:600 12px var(--mono);letter-spacing:.18em;color:var(--good);
+    border:1px solid rgba(57,255,166,.3);padding:7px 13px;border-radius:999px;background:rgba(57,255,166,.06)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+  .clock{font:500 13px var(--mono);color:var(--ink-faint);min-width:84px;text-align:right}
+  .sub{font-size:13px;color:var(--ink-dim);margin-top:-6px;letter-spacing:.02em}
+  /* ── kpi row ── */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .card{position:relative;background:var(--panel);border:1px solid var(--panel-edge);border-radius:16px;
+    padding:16px 18px;backdrop-filter:blur(7px);overflow:hidden}
+  .card::after{content:"";position:absolute;inset:0;border-radius:16px;
+    background:linear-gradient(180deg,rgba(57,230,255,.06),transparent 40%);pointer-events:none}
+  .card .label{font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+  .card .val{font-size:34px;font-weight:750;margin-top:8px;letter-spacing:-.01em}
+  .card .delta{font:600 12px var(--mono);margin-top:6px}
+  .up{color:var(--good)} .down{color:var(--bad)} .flat{color:var(--ink-dim)}
+  .card .bar{position:absolute;left:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  /* ── main grid ── */
+  .grid{flex:1;display:grid;grid-template-columns:1.55fr 1fr;gap:18px;min-height:0}
+  .panel{background:var(--panel);border:1px solid var(--panel-edge);border-radius:18px;padding:18px 20px;
+    backdrop-filter:blur(7px);display:flex;flex-direction:column;min-height:0}
+  .panel h2{font:600 12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:14px;
+    display:flex;align-items:center;gap:8px}
+  .panel h2::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .left{gap:16px}
+  canvas{width:100%;flex:1;min-height:120px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  thead th{font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);
+    text-align:left;padding:6px 8px;border-bottom:1px solid rgba(80,210,255,.14)}
+  tbody td{padding:9px 8px;border-bottom:1px solid rgba(80,160,210,.07);color:var(--ink)}
+  tbody tr:hover{background:rgba(57,230,255,.04)}
+  .pill{font:600 11px var(--mono);padding:3px 9px;border-radius:999px}
+  .pill.good{color:var(--good);background:rgba(57,255,166,.1)} .pill.warn{color:var(--warn);background:rgba(255,207,90,.1)}
+  .pill.bad{color:var(--bad);background:rgba(255,93,115,.1)}
+  /* ── feed ── */
+  .feed{overflow:hidden;display:flex;flex-direction:column;gap:0}
+  .ev{display:flex;gap:11px;padding:9px 2px;border-bottom:1px solid rgba(80,160,210,.07);animation:slidein .4s ease}
+  @keyframes slidein{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+  .ev .ts{font:500 11px var(--mono);color:var(--ink-faint);min-width:52px}
+  .ev .tx{font-size:13px;color:var(--ink)}
+  .ev .tag{font:700 10px var(--mono);letter-spacing:.06em;color:var(--accent)}
+  footer{display:flex;align-items:center;gap:10px;font:500 11px var(--mono);color:var(--ink-faint);letter-spacing:.06em}
+  footer .b{color:var(--ink-dim)}
+  .stale{color:var(--warn)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="mark">
+        <div class="glyph">◎</div>
+        <div>
+          <div class="t">Omo Mission Control</div>
+          <div class="h" id="title">Live Dashboard</div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <div class="clock" id="clock">--:--:--</div>
+      <div class="live"><span class="dot"></span><span id="livelabel">LIVE</span></div>
+    </header>
+    <div class="sub" id="subtitle">Connecting to the crew…</div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="grid">
+      <div class="panel left">
+        <h2 id="chartTitle">Performance</h2>
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="panel">
+        <h2 id="tableTitle">Breakdown</h2>
+        <table><thead id="thead"></thead><tbody id="tbody"></tbody></table>
+        <h2 style="margin-top:18px" id="feedTitle">Activity</h2>
+        <div class="feed" id="feed"></div>
+      </div>
+    </div>
+
+    <footer>
+      <span class="b">SOURCE</span><span id="source">world-api · mcp</span>
+      <span style="flex:1"></span>
+      <span class="b">UPDATED</span><span id="updated">—</span>
+      <span class="b">·</span><span id="agent">Gemini · ADK</span>
+    </footer>
+  </div>
+
+<script>
+// Baked demo spec — the live fetch replaces this. Shape is the contract the
+// agent fills via the World API (world_dashboard / dashboard spec).
+const DEMO_SPEC = {
+  title: "Growth · Ad Performance",
+  subtitle: "Autonomous Growth function · trailing 7 days · refreshing live",
+  kpis: [
+    { label: "Blended ROAS", value: "3.1x", delta: "+0.4", dir: "up" },
+    { label: "Spend (7d)", value: "$600", delta: "on pace", dir: "flat" },
+    { label: "New signups", value: "30", delta: "overnight", dir: "up" },
+    { label: "Flagged", value: "1", delta: "ROAS < 2.0", dir: "down" }
+  ],
+  chart: { title: "ROAS by campaign", labels: ["Prospecting","Retargeting","Lookalike","Brand"], values: [2.7,4.1,3.3,2.2] },
+  table: {
+    title: "Campaigns",
+    cols: ["Campaign","Spend","ROAS","Status"],
+    rows: [
+      ["Prospecting","$420","2.7x",{pill:"warn",text:"watch"}],
+      ["Retargeting","$180","4.1x",{pill:"good",text:"scale"}],
+      ["Lookalike","$140","3.3x",{pill:"good",text:"ok"}],
+      ["Brand","$90","2.2x",{pill:"bad",text:"pause?"}]
+    ]
+  },
+  feed: [
+    { ts:"just now", tag:"GROWTH", text:"Pulled ROAS via Meta Ads (MCP)." },
+    { ts:"+2s", tag:"COMMS", text:"Drafted 30 welcome emails — awaiting approval." },
+    { ts:"+4s", tag:"CHIEF", text:"Synthesised: spend still paying off; flag Brand." }
+  ],
+  source: "world-api · mcp",
+  agent: "Gemini · ADK"
+};
+
+const qs = new URLSearchParams(location.search);
+const ID = qs.get("id") || "growth";
+const SPEC_URL = qs.get("spec") || ("/api/dash/" + ID);
+const POLL_MS = Number(qs.get("poll") || 3000);
+
+const $ = (id) => document.getElementById(id);
+let lastOk = 0;
+
+function setText(id, t){ const e=$(id); if(e) e.textContent = t; }
+
+function renderKpis(kpis){
+  const host = $("kpis"); host.innerHTML = "";
+  (kpis||[]).slice(0,4).forEach((k,i) => {
+    const dir = k.dir==="up"?"up":k.dir==="down"?"down":"flat";
+    const arrow = k.dir==="up"?"▲":k.dir==="down"?"▼":"→";
+    const el = document.createElement("div"); el.className="card";
+    el.innerHTML = `<div class="label">${esc(k.label)}</div>
+      <div class="val">${esc(k.value)}</div>
+      <div class="delta ${dir}">${arrow} ${esc(k.delta||"")}</div>
+      <div class="bar" style="width:${30+i*18}%"></div>`;
+    host.appendChild(el);
+  });
+}
+
+function renderTable(t){
+  if(!t){ $("tableTitle").style.display="none"; return; }
+  $("tableTitle").style.display=""; setText("tableTitle", t.title||"Breakdown");
+  $("thead").innerHTML = "<tr>" + (t.cols||[]).map(c=>`<th>${esc(c)}</th>`).join("") + "</tr>";
+  $("tbody").innerHTML = (t.rows||[]).map(r => "<tr>" + r.map(cell => {
+    if(cell && typeof cell==="object" && cell.pill) return `<td><span class="pill ${cell.pill}">${esc(cell.text)}</span></td>`;
+    return `<td>${esc(String(cell))}</td>`;
+  }).join("") + "</tr>").join("");
+}
+
+function renderFeed(feed){
+  const host=$("feed"); host.innerHTML="";
+  (feed||[]).slice(0,6).forEach(ev => {
+    const el=document.createElement("div"); el.className="ev";
+    el.innerHTML = `<span class="ts">${esc(ev.ts||"")}</span><span class="tx"><span class="tag">${esc(ev.tag||"")}</span> ${esc(ev.text||"")}</span>`;
+    host.appendChild(el);
+  });
+}
+
+// Lightweight canvas bar chart (no deps).
+function renderChart(c){
+  const cv=$("chart"); const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth, h=cv.clientHeight; cv.width=w*dpr; cv.height=h*dpr;
+  const ctx=cv.getContext("2d"); ctx.scale(dpr,dpr); ctx.clearRect(0,0,w,h);
+  setText("chartTitle", (c&&c.title)||"Performance");
+  if(!c||!c.values||!c.values.length) return;
+  const labels=c.labels||c.values.map((_,i)=>"#"+(i+1)); const vals=c.values;
+  const max=Math.max.apply(null,vals.concat([1]))*1.15;
+  const padL=34, padB=26, padT=10, padR=8;
+  const cw=w-padL-padR, ch=h-padB-padT;
+  // gridlines + y labels
+  ctx.font="10px "+getComputedStyle(document.body).getPropertyValue("--mono");
+  ctx.fillStyle="#48708e"; ctx.strokeStyle="rgba(80,160,210,.12)"; ctx.lineWidth=1;
+  for(let g=0; g<=4; g++){ const y=padT+ch-(ch*g/4); ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(w-padR,y); ctx.stroke();
+    ctx.fillText((max*g/4).toFixed(1), 4, y+3); }
+  const n=vals.length, bw=cw/n*0.55, gap=cw/n;
+  vals.forEach((v,i)=>{
+    const x=padL+gap*i+(gap-bw)/2; const bh=ch*(v/max); const y=padT+ch-bh;
+    const grad=ctx.createLinearGradient(0,y,0,padT+ch);
+    grad.addColorStop(0,"#39e6ff"); grad.addColorStop(1,"rgba(124,123,255,.55)");
+    ctx.fillStyle=grad; roundRect(ctx,x,y,bw,bh,5); ctx.fill();
+    ctx.fillStyle="#dbeeff"; ctx.font="600 12px "+getComputedStyle(document.body).getPropertyValue("--mono");
+    ctx.textAlign="center"; ctx.fillText(typeof v==="number"?(v%1?v.toFixed(1):v)+"":v, x+bw/2, y-5);
+    ctx.fillStyle="#7fa6c4"; ctx.font="11px "+getComputedStyle(document.body).getPropertyValue("--sans");
+    ctx.fillText(String(labels[i]).slice(0,10), x+bw/2, padT+ch+15);
+    ctx.textAlign="left";
+  });
+}
+function roundRect(ctx,x,y,w,h,r){ r=Math.min(r,w/2,h/2); ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function apply(spec){
+  window.__lastSpec = spec;
+  setText("title", spec.title||"Live Dashboard");
+  setText("subtitle", spec.subtitle||"");
+  setText("source", spec.source||"world-api · mcp");
+  setText("agent", spec.agent||"Gemini · ADK");
+  renderKpis(spec.kpis); renderChart(spec.chart); renderTable(spec.table); renderFeed(spec.feed);
+}
+
+async function poll(){
+  try{
+    const r = await fetch(SPEC_URL, {cache:"no-store"});
+    if(r.ok){ const spec = await r.json(); apply(spec); lastOk=Date.now();
+      setText("updated", new Date().toLocaleTimeString()); $("livelabel").textContent="LIVE";
+      $("livelabel").parentElement.style.color=""; }
+  }catch(e){ /* keep last render */ }
+  // staleness indicator
+  if(lastOk && Date.now()-lastOk>POLL_MS*3){ $("livelabel").textContent="STALE"; }
+}
+
+function tickClock(){ setText("clock", new Date().toLocaleTimeString()); }
+
+// Boot: show demo spec instantly so the wall is never blank, then go live.
+apply(DEMO_SPEC); setText("updated","demo");
+tickClock(); setInterval(tickClock,1000);
+poll(); setInterval(poll, POLL_MS);
+window.addEventListener("resize", ()=>renderChart((window.__lastSpec||DEMO_SPEC).chart));
+</script>
+</body>
+</html>

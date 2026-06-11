@@ -1,0 +1,1727 @@
+ ▐▛███▜▌   Claude Code v2.1.150
+▝▜█████▛▘  Opus 4.7 · Claude Max
+  ▘▘ ▝▝    ~/agentcraft/plugin
+
+❯ [Image #1] pretend that you are a world class map builder, we want to make    
+  our map even more beautiful like this, for the skybuild command, we want the  
+  world to truly be beautiful                                                   
+  ⎿  [Image #1]
+
+  Searched for 3 patterns, read 3 files (ctrl+o to expand)
+
+⏺ I have a good picture of the existing builder. Let me make it significantly
+  more beautiful — taller glowing arches with gem clusters, a multi-tier palace
+  temple, a rainbow, wider gold-accented path, larger cherry blossom canopies,
+  more elaborate hot-air balloon, and more populated sub-islands.
+
+  Let me start with the most impactful visual changes. First, a bigger, grander
+  temple with tiered dome and lit windows.
+
+⏺ Update(src/main/java/com/agentcraft/village/SkyHubBuilder.java)
+  ⎿  Added 165 lines, removed 35 lines
+      618      // -------------------------------------------------------
+           ----------
+      619  
+      620      /**
+      621 -     * Small ornamental dome temple behind the center arch. ~5
+          - blocks wide,                                                 
+      622 -     * 4 blocks tall, white quartz walls with a gold capstone 
+          -+ end-rod                                                     
+      623 -     * finial.                                                
+      621 +     * Grand palatial dome temple behind the center arch — a 7
+          +x7 footprint                                                  
+      622 +     * with a quartz colonnade, four lit stained-glass windows
+          +, a stacked                                                   
+      623 +     * three-tier gold-banded dome, and a tall gold-star spire
+          + with an                                                      
+      624 +     * end-rod cluster halo. Designed to read as the centerpie
+          +ce building                                                   
+      625 +     * of the sky planet at a distance.                       
+      626       */
+      627      private int buildTemple(World w, int cx, int cy, int cz) {
+      628          int placed = 0;
+      629          int tx = cx;
+      628 -        int tz = cz - 14;                                     
+      630 +        int tz = cz - 13;                                     
+      631          if (tx * tx + tz * tz > radius * radius) {
+      630 -            // If we'd be off-planet, pull it in.             
+      631 -            tz = cz - Math.min(14, radius - 4);               
+      632 +            tz = cz - Math.min(13, radius - 5);               
+      633          }
+      634          int baseY = topSurfaceY(cy, tx - cx, tz - cz) + 1;
+      635  
+      635 -        Material wall = matOr("QUARTZ_BLOCK", Material.SMOOTH_
+          -QUARTZ);                                                      
+      636 -        Material infill = matOr("WHITE_CONCRETE", Material.WHI
+          -TE_TERRACOTTA);                                               
+      636 +        Material wall      = matOr("QUARTZ_BLOCK",          Ma
+          +terial.SMOOTH_QUARTZ);                                        
+      637 +        Material smooth    = matOr("SMOOTH_QUARTZ",         Ma
+          +terial.QUARTZ_BLOCK);                                         
+      638 +        Material pillar    = matOr("QUARTZ_PILLAR",         Ma
+          +terial.QUARTZ_BLOCK);                                         
+      639 +        Material chiseled  = matOr("CHISELED_QUARTZ_BLOCK", wa
+          +ll);                                                          
+      640 +        Material window    = matOr("LIGHT_BLUE_STAINED_GLASS",
+          + Material.GLASS);                                             
+      641 +        Material windowSrc = Material.SEA_LANTERN;            
+      642 +        Material gold      = Material.GOLD_BLOCK;             
+      643 +        Material goldStair = matOr("POLISHED_DIORITE_STAIRS", 
+      644 +                                matOr("STONE_BRICK_STAIRS", Ma
+          +terial.COBBLESTONE_STAIRS));                                  
+      645  
+      638 -        // 5x5 platform.                                      
+      639 -        for (int dx = -2; dx <= 2; dx++) {                    
+      640 -            for (int dz = -2; dz <= 2; dz++) {                
+      646 +        // 7x7 raised marble platform (one block proud of the 
+          +surrounding grass).                                           
+      647 +        for (int dx = -3; dx <= 3; dx++) {                    
+      648 +            for (int dz = -3; dz <= 3; dz++) {                
+      649                  Block b = w.getBlockAt(tx + dx, baseY, tz + dz
+           );
+      642 -                b.setType(matOr("SMOOTH_QUARTZ", Material.QUAR
+          -TZ_BLOCK), false);                                            
+      650 +                boolean edge = Math.abs(dx) == 3 || Math.abs(d
+          +z) == 3;                                                      
+      651 +                b.setType(edge ? wall : smooth, false);       
+      652                  placed++;
+      653              }
+      654          }
+      655  
+      647 -        // Walls: 4 corner pillars + infill, 3 blocks tall.   
+      648 -        for (int dy = 1; dy <= 3; dy++) {                     
+      649 -            for (int dx = -2; dx <= 2; dx++) {                
+      650 -                for (int dz = -2; dz <= 2; dz++) {            
+      651 -                    boolean edge = Math.abs(dx) == 2 || Math.a
+          -bs(dz) == 2;                                                  
+      656 +        // Four corner pillars (quartz-pillar) and three sides
+          + of cella walls,                                              
+      657 +        // 4 blocks tall. Each non-corner wall block at row 2 
+          +is a lit window.                                              
+      658 +        int wallHeight = 4;                                   
+      659 +        for (int dy = 1; dy <= wallHeight; dy++) {            
+      660 +            for (int dx = -3; dx <= 3; dx++) {                
+      661 +                for (int dz = -3; dz <= 3; dz++) {            
+      662 +                    boolean edge = Math.abs(dx) == 3 || Math.a
+          +bs(dz) == 3;                                                  
+      663                      if (!edge) continue;
+      653 -                    boolean corner = Math.abs(dx) == 2 && Math
+          -.abs(dz) == 2;                                                
+      654 -                    // Skip a doorway on the south face.      
+      655 -                    boolean doorway = (dz == 2 && dx == 0 && d
+          -y <= 2);                                                      
+      664 +                    boolean corner = Math.abs(dx) == 3 && Math
+          +.abs(dz) == 3;                                                
+      665 +                    // Doorway on the south face (front).     
+      666 +                    boolean doorway = (dz == 3 && Math.abs(dx)
+          + <= 1 && dy <= 2);                                            
+      667                      if (doorway) continue;
+      668                      Block b = w.getBlockAt(tx + dx, baseY + dy
+           , tz + dz);
+      658 -                    b.setType(corner ? wall : infill, false); 
+      669 +                    if (corner) {                             
+      670 +                        b.setType(pillar, false);             
+      671 +                        BlockData pd = b.getBlockData();      
+      672 +                        if (pd instanceof Orientable o) {     
+      673 +                            o.setAxis(org.bukkit.Axis.Y);     
+      674 +                            b.setBlockData(o, false);         
+      675 +                        }                                     
+      676 +                    } else if (dy == 2 && (Math.abs(dx) == 1 |
+          +| Math.abs(dz) == 1)) {                                       
+      677 +                        // Lit window slits: the non-corner wa
+          +ll block is glass                                             
+      678 +                        // with a sea lantern hidden one block
+          + inside for a                                                 
+      679 +                        // dusk-warm glow through the planet's
+          + blue sky.                                                    
+      680 +                        b.setType(window, false);             
+      681 +                        // Inside lantern (light source).     
+      682 +                        int ix = dx == 0 ? 0 : (dx > 0 ? 2 : -
+          +2);                                                           
+      683 +                        int iz = dz == 0 ? 0 : (dz > 0 ? 2 : -
+          +2);                                                           
+      684 +                        if (Math.abs(dx) == 3) { ix = dx > 0 ?
+          + 2 : -2; iz = dz; }                                           
+      685 +                        if (Math.abs(dz) == 3) { iz = dz > 0 ?
+          + 2 : -2; ix = dx; }                                           
+      686 +                        w.getBlockAt(tx + ix, baseY + dy, tz +
+          + iz).setType(windowSrc, false);                               
+      687 +                        placed++;                             
+      688 +                    } else {                                  
+      689 +                        b.setType(wall, false);               
+      690 +                    }                                         
+      691                      placed++;
+      692                  }
+      693              }
+      694          }
+      695  
+      664 -        // Dome roof: 5x5 quartz ring at baseY+4, then 3x3 rin
+          -g at baseY+5,                                                 
+      665 -        // then a single gold capstone at baseY+6 with an end-
+          -rod finial.                                                   
+      696 +        // Gold-block banding course just above the wall (the 
+          +dome cornice).                                                
+      697 +        int corniceY = baseY + wallHeight + 1;                
+      698 +        for (int dx = -3; dx <= 3; dx++) {                    
+      699 +            for (int dz = -3; dz <= 3; dz++) {                
+      700 +                boolean edge = Math.abs(dx) == 3 || Math.abs(d
+          +z) == 3;                                                      
+      701 +                Block b = w.getBlockAt(tx + dx, corniceY, tz +
+          + dz);                                                         
+      702 +                b.setType(edge ? gold : smooth, false);       
+      703 +                placed++;                                     
+      704 +            }                                                 
+      705 +        }                                                     
+      706 +                                                              
+      707 +        // Three-tier stepped dome (7x7 -> 5x5 -> 3x3 -> 1 cap
+          +) with stair                                                  
+      708 +        // outsteps for the rounded silhouette of a cupola.   
+      709 +        int domeBase = corniceY + 1;                          
+      710 +        // Tier 1 — 7x7 ring of stairs angling outward + smoot
+          +h-quartz infill.                                              
+      711 +        for (int dx = -3; dx <= 3; dx++) {                    
+      712 +            for (int dz = -3; dz <= 3; dz++) {                
+      713 +                boolean edge = Math.abs(dx) == 3 || Math.abs(d
+          +z) == 3;                                                      
+      714 +                if (!edge) continue;                          
+      715 +                Block b = w.getBlockAt(tx + dx, domeBase, tz +
+          + dz);                                                         
+      716 +                BlockData sd = Bukkit.createBlockData(goldStai
+          +r);                                                           
+      717 +                if (sd instanceof Stairs s) {                 
+      718 +                    s.setFacing(outwardFace(dx, dz));         
+      719 +                    s.setHalf(Bisected.Half.BOTTOM);          
+      720 +                    b.setBlockData(s, false);                 
+      721 +                } else {                                      
+      722 +                    b.setType(wall, false);                   
+      723 +                }                                             
+      724 +                placed++;                                     
+      725 +            }                                                 
+      726 +        }                                                     
+      727          for (int dx = -2; dx <= 2; dx++) {
+      728              for (int dz = -2; dz <= 2; dz++) {
+      668 -                Block b = w.getBlockAt(tx + dx, baseY + 4, tz 
+          -+ dz);                                                        
+      669 -                b.setType(wall, false);                       
+      729 +                w.getBlockAt(tx + dx, domeBase, tz + dz).setTy
+          +pe(smooth, false);                                            
+      730                  placed++;
+      731              }
+      732          }
+      733 +        // Tier 2 — 5x5 with gold-block edge band.            
+      734 +        for (int dx = -2; dx <= 2; dx++) {                    
+      735 +            for (int dz = -2; dz <= 2; dz++) {                
+      736 +                boolean edge = Math.abs(dx) == 2 || Math.abs(d
+          +z) == 2;                                                      
+      737 +                Block b = w.getBlockAt(tx + dx, domeBase + 1, 
+          +tz + dz);                                                     
+      738 +                b.setType(edge ? gold : smooth, false);       
+      739 +                placed++;                                     
+      740 +            }                                                 
+      741 +        }                                                     
+      742 +        // Tier 3 — 3x3 chiseled quartz drum.                 
+      743          for (int dx = -1; dx <= 1; dx++) {
+      744              for (int dz = -1; dz <= 1; dz++) {
+      675 -                Block b = w.getBlockAt(tx + dx, baseY + 5, tz 
+          -+ dz);                                                        
+      676 -                b.setType(matOr("CHISELED_QUARTZ_BLOCK", wall)
+          -, false);                                                     
+      745 +                w.getBlockAt(tx + dx, domeBase + 2, tz + dz).s
+          +etType(chiseled, false);                                      
+      746                  placed++;
+      747              }
+      748          }
+      680 -        Block cap = w.getBlockAt(tx, baseY + 6, tz);          
+      681 -        cap.setType(Material.GOLD_BLOCK, false);              
+      682 -        Block finial = w.getBlockAt(tx, baseY + 7, tz);       
+      683 -        finial.setType(Material.END_ROD, false);              
+      684 -        BlockData fd = finial.getBlockData();                 
+      685 -        if (fd instanceof Directional dir) {                  
+      686 -            dir.setFacing(BlockFace.UP);                      
+      687 -            finial.setBlockData(fd, false);                   
+      749 +        // Gold cupola cap with star spire above it.          
+      750 +        w.getBlockAt(tx, domeBase + 3, tz).setType(gold, false
+          +);                                                            
+      751 +        w.getBlockAt(tx, domeBase + 4, tz).setType(gold, false
+          +);                                                            
+      752 +        w.getBlockAt(tx, domeBase + 5, tz).setType(gold, false
+          +);                                                            
+      753 +        // Four-arm gold "star" at the peak.                  
+      754 +        int starY = domeBase + 6;                             
+      755 +        w.getBlockAt(tx, starY, tz).setType(gold, false);     
+      756 +        w.getBlockAt(tx + 1, starY, tz).setType(gold, false); 
+      757 +        w.getBlockAt(tx - 1, starY, tz).setType(gold, false); 
+      758 +        w.getBlockAt(tx, starY, tz + 1).setType(gold, false); 
+      759 +        w.getBlockAt(tx, starY, tz - 1).setType(gold, false); 
+      760 +        // End-rod sparkle on the four star tips and one strai
+          +ght up.                                                       
+      761 +        for (int[] off : new int[][]{{2, 0}, {-2, 0}, {0, 2}, 
+          +{0, -2}, {0, 0}}) {                                           
+      762 +            Block rod = w.getBlockAt(tx + off[0], starY, tz + 
+          +off[1]);                                                      
+      763 +            if (off[0] == 0 && off[1] == 0) {                 
+      764 +                rod = w.getBlockAt(tx, starY + 1, tz);        
+      765 +            }                                                 
+      766 +            rod.setType(Material.END_ROD, false);             
+      767 +            BlockData rd = rod.getBlockData();                
+      768 +            if (rd instanceof Directional dir) {              
+      769 +                dir.setFacing(BlockFace.UP);                  
+      770 +                rod.setBlockData(rd, false);                  
+      771 +            }                                                 
+      772 +            placed++;                                         
+      773          }
+      774 +        placed += 8;                                          
+      775 +                                                              
+      776 +        // Soft-glow under-trim: a ring of sea lanterns inside
+          + the cella floor                                              
+      777 +        // visible through the open doorway.                  
+      778 +        for (int dx = -1; dx <= 1; dx++) {                    
+      779 +            for (int dz = -1; dz <= 1; dz++) {                
+      780 +                Block b = w.getBlockAt(tx + dx, baseY, tz + dz
+          +);                                                            
+      781 +                b.setType(Material.SEA_LANTERN, false);       
+      782 +                placed++;                                     
+      783 +            }                                                 
+      784 +        }                                                     
+      785 +        // Cella center: gold block with a candle on top to su
+          +ggest an altar.                                               
+      786 +        w.getBlockAt(tx, baseY + 1, tz).setType(gold, false); 
+      787 +        Block altar = w.getBlockAt(tx, baseY + 2, tz);        
+      788 +        Material altarCandle = matOr("GOLD_BLOCK", Material.GO
+          +LD_BLOCK);                                                    
+      789 +        // Skip a candle on top of the gold — it would block t
+          +he spire view.                                                
+      790 +        altar.setType(altarCandle, false);                    
+      791          placed += 2;
+      792  
+      793 +        // Two flanking torch-pillars outside the front door f
+          +or grandeur.                                                  
+      794 +        for (int dx : new int[]{-2, 2}) {                     
+      795 +            int px = tx + dx;                                 
+      796 +            int pz = tz + 4; // one block south of the platfor
+          +m edge                                                        
+      797 +            int sy = topSurfaceY(cy, px - cx, pz - cz) + 1;   
+      798 +            for (int dy = 0; dy < 3; dy++) {                  
+      799 +                w.getBlockAt(px, sy + dy, pz).setType(pillar, 
+          +false);                                                       
+      800 +                placed++;                                     
+      801 +            }                                                 
+      802 +            Block top = w.getBlockAt(px, sy + 3, pz);         
+      803 +            top.setType(gold, false);                         
+      804 +            Block flame = w.getBlockAt(px, sy + 4, pz);       
+      805 +            flame.setType(Material.END_ROD, false);           
+      806 +            BlockData fd2 = flame.getBlockData();             
+      807 +            if (fd2 instanceof Directional dir) {             
+      808 +                dir.setFacing(BlockFace.UP);                  
+      809 +                flame.setBlockData(fd2, false);               
+      810 +            }                                                 
+      811 +            placed += 2;                                      
+      812 +        }                                                     
+      813 +                                                              
+      814          return placed;
+      815      }
+      816  
+      817 +    /** Outward cardinal face an edge block at (dx,dz) points 
+          +toward. */                                                    
+      818 +    private static BlockFace outwardFace(int dx, int dz) {    
+      819 +        int adx = Math.abs(dx), adz = Math.abs(dz);           
+      820 +        if (adx >= adz) return dx < 0 ? BlockFace.WEST : Block
+          +Face.EAST;                                                    
+      821 +        return dz < 0 ? BlockFace.NORTH : BlockFace.SOUTH;    
+      822 +    }                                                         
+      823 +                                                              
+      824      /** Simple voxel windmill on the east side of the planet. 
+           */
+      825      private int buildWindmill(World w, int cx, int cy, int cz)
+            {
+      826          int placed = 0;
+
+⏺ Now let me enhance the arches — taller silhouette with rounded stepped tops,
+  amethyst gem clusters, and bolder inner glows.
+
+⏺ Update(src/main/java/com/agentcraft/village/SkyHubBuilder.java)
+  ⎿  Error editing file
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Let me make smaller, targeted enhancements to the arch — adding a gold base
+  course, amethyst cluster column tops, and colored stained-glass cheeks:
+
+⏺ Update(src/main/java/com/agentcraft/village/SkyHubBuilder.java)
+  ⎿  Added 5 lines, removed 1 line
+      485          }
+      486  
+      487          // Columns: two stacks at x = -2 and x = +2, each open
+           ingHeight+1 tall.
+      488 +        // Each column gets a gold-block plinth at the base fo
+          +r a monumental,                                               
+      489 +        // gilded silhouette.                                 
+      490          for (int s : new int[] { -2, 2 }) {
+      489 -            for (int dy = 0; dy <= openingHeight; dy++) {     
+      491 +            w.getBlockAt(ax + s, baseY, az).setType(Material.G
+          +OLD_BLOCK, false);                                            
+      492 +            placed++;                                         
+      493 +            for (int dy = 1; dy <= openingHeight; dy++) {     
+      494                  Block b = w.getBlockAt(ax + s, baseY + dy, az)
+           ;
+      495                  b.setType(spec.column, false);
+      496                  placed++;
+
+⏺ Now add column-top amethyst clusters and inner stained-glass cheeks. I'll
+  insert after the lintel band placement:
+
+⏺ Update(src/main/java/com/agentcraft/village/SkyHubBuilder.java)  ⎿  Added 40 lines
+      508              placed++;
+      509          }
+      510  
+      511 +        // Inner cheeks: colored stained-glass blocks on the i
+          +nside corners                                                 
+      512 +        // of the lintel (x = -1, +1 at lintelY) so the unders
+          +ide of the                                                    
+      513 +        // arch glows with the slot's signature color. The pla
+          +yer walks                                                     
+      514 +        // *under* this row.                                  
+      515 +        Material innerCheek = switch (spec.slot) {            
+      516 +            case "game" -> Material.LIGHT_BLUE_STAINED_GLASS; 
+      517 +            case "learning" -> matOr("YELLOW_STAINED_GLASS", M
+          +aterial.YELLOW_STAINED_GLASS);                                
+      518 +            case "task" -> matOr("PURPLE_STAINED_GLASS", Mater
+          +ial.MAGENTA_STAINED_GLASS);                                   
+      519 +            default -> Material.WHITE_STAINED_GLASS;          
+      520 +        };                                                    
+      521 +        w.getBlockAt(ax - 1, lintelY, az).setType(innerCheek, 
+          +false);                                                       
+      522 +        w.getBlockAt(ax + 1, lintelY, az).setType(innerCheek, 
+          +false);                                                       
+      523 +        placed += 2;                                          
+      524 +                                                              
+      525 +        // Crystal finials atop each column — an amethyst-bloc
+          +k plug capped                                                 
+      526 +        // by an amethyst cluster pointing up. Gives the arche
+          +s the gem-                                                    
+      527 +        // tipped silhouette of the reference image.          
+      528 +        Material gemBase = switch (spec.slot) {               
+      529 +            case "game" -> matOr("AMETHYST_BLOCK", Material.LA
+          +PIS_BLOCK);                                                   
+      530 +            case "learning" -> Material.GOLD_BLOCK;           
+      531 +            case "task" -> matOr("AMETHYST_BLOCK", Material.PU
+          +RPLE_CONCRETE);                                               
+      532 +            default -> Material.GOLD_BLOCK;                   
+      533 +        };                                                    
+      534 +        Material gemTip = matOr("AMETHYST_CLUSTER", Material.E
+          +ND_ROD);                                                      
+      535 +        for (int s : new int[] { -2, 2 }) {                   
+      536 +            Block base = w.getBlockAt(ax + s, lintelY, az);   
+      537 +            base.setType(gemBase, false);                     
+      538 +            Block tip = w.getBlockAt(ax + s, lintelY + 1, az);
+      539 +            tip.setType(gemTip, false);                       
+      540 +            BlockData td = tip.getBlockData();                
+      541 +            if (td instanceof AmethystCluster ac) {           
+      542 +                ac.setFacing(BlockFace.UP);                   
+      543 +                tip.setBlockData(ac, false);                  
+      544 +            } else if (td instanceof Directional dir) {       
+      545 +                dir.setFacing(BlockFace.UP);                  
+      546 +                tip.setBlockData(dir, false);                 
+      547 +            }                                                 
+      548 +            placed += 2;                                      
+      549 +        }                                                     
+      550 +                                                              
+      551          // Triangular peak made of stairs above the lintel.
+      552          // Row lintelY+1: stairs at x = -1 and x = +1 (facing 
+           inward).
+      553          Material stairMat = spec.stairMat;
+
+⏺ Now widen the path to 3 blocks with gold accent stones every 4 blocks, and add
+   more lanterns:
+
+⏺ Update(src/main/java/com/agentcraft/village/SkyHubBuilder.java)
+  ⎿  Added 26 lines, removed 23 lines
+      299      private int buildStonePath(World w, int cx, int cy, int cz
+           , int[] surfaceY) {
+      300          int placed = 0;
+      301  
+      302 -        // Path "spine" along the south-north axis (dz = +SPAW
+          -N_DZ → 0).                                                    
+      303 -        // Single-block-wide stepping stones following the dom
+          -e curvature.                                                  
+      304 -        for (int dz = SPAWN_DZ; dz >= -2; dz--) {             
+      305 -            int sy = topSurfaceY(cy, 0, dz);                  
+      306 -            // Replace top grass with polished-andesite slab-l
+          -ike path stone.                                               
+      307 -            Block surface = w.getBlockAt(cx, sy, cz + dz);    
+      308 -            surface.setType(Material.POLISHED_ANDESITE, false)
+          -;                                                             
+      309 -            placed++;                                         
+      302 +        Material core   = matOr("POLISHED_ANDESITE", Material.
+          +STONE);                                                       
+      303 +        Material edge   = matOr("STONE_BRICKS", Material.COBBL
+          +ESTONE);                                                      
+      304 +        Material accent = Material.GOLD_BLOCK;                
+      305  
+      311 -            // Place a slab on top occasionally as decorative 
+          -stepping.                                                     
+      312 -            if (dz % 2 == 0) {                                
+      313 -                Block step = w.getBlockAt(cx, sy + 1, cz + dz)
+          -;                                                             
+      314 -                Material slab = matOr("STONE_BRICK_SLAB", Mate
+          -rial.STONE_SLAB);                                             
+      315 -                if (slab != null && step.getType().isAir()) { 
+      316 -                    step.setType(slab, false);                
+      317 -                    placed++;                                 
+      318 -                }                                             
+      306 +        // 3-wide path "spine" along the south-north axis (dz 
+          += +SPAWN_DZ → 0):                                             
+      307 +        // stone-brick edges flank a polished-andesite center,
+          + with a gold                                                  
+      308 +        // accent stone every 4 blocks down the centerline.   
+      309 +        for (int dz = SPAWN_DZ; dz >= -2; dz--) {             
+      310 +            for (int dx = -1; dx <= 1; dx++) {                
+      311 +                int sy = topSurfaceY(cy, dx, dz);             
+      312 +                Block surface = w.getBlockAt(cx + dx, sy, cz +
+          + dz);                                                         
+      313 +                Material mat;                                 
+      314 +                if (dx == 0 && Math.floorMod(dz, 4) == 0) mat 
+          += accent;                                                     
+      315 +                else if (dx == 0) mat = core;                 
+      316 +                else mat = edge;                              
+      317 +                surface.setType(mat, false);                  
+      318 +                placed++;                                     
+      319              }
+      320          }
+      321  
+      322 -        // Lanterns flanking the path every 4 blocks.         
+      323 -        for (int dz = SPAWN_DZ - 1; dz >= 0; dz -= 4) {       
+      322 +        // Lanterns flanking the path every 3 blocks — closer 
+          +spacing, taller                                               
+      323 +        // posts so the path feels like a real avenue.        
+      324 +        for (int dz = SPAWN_DZ - 1; dz >= -1; dz -= 3) {      
+      325              for (int side : new int[] { -2, 2 }) {
+      326                  int sy = topSurfaceY(cy, side, dz);
+      327                  Block fence1 = w.getBlockAt(cx + side, sy + 1,
+            cz + dz);
+      328                  Block fence2 = w.getBlockAt(cx + side, sy + 2,
+            cz + dz);
+      328 -                fence1.setType(Material.OAK_FENCE, false);    
+      329 -                fence2.setType(Material.OAK_FENCE, false);    
+      330 -                Block lantern = w.getBlockAt(cx + side, sy + 3
+          -, cz + dz);                                                   
+      329 +                Block fence3 = w.getBlockAt(cx + side, sy + 3,
+          + cz + dz);                                                    
+      330 +                fence1.setType(Material.BAMBOO_FENCE, false); 
+      331 +                fence2.setType(Material.BAMBOO_FENCE, false); 
+      332 +                fence3.setType(Material.IRON_CHAIN, false);   
+      333 +                Block lantern = w.getBlockAt(cx + side, sy + 4
+          +, cz + dz);                                                   
+      334                  lantern.setType(Material.LANTERN, false);
+      335                  BlockData d = lantern.getBlockData();
+      336                  if (d instanceof Lantern l) {
+      334 -                    l.setHanging(false);                      
+      337 +                    l.setHanging(true);                       
+      338                      lantern.setBlockData(l, false);
+      339                  }
+      337 -                placed += 3;                                  
+      340 +                placed += 4;                                  
+      341              }
+      342          }
+      343  
+
+⏺ Now add a rainbow arc and wire it into the build. Let me add a new method and
+  call it from build():
+
+⏺ Update(src/main/java/com/agentcraft/village/SkyHubBuilder.java)
+  ⎿  Added 101 lines
+      175          // 13) Hot air balloon drifting below the planet.
+      176          blocks += buildHotAirBalloon(world, cx, cy, cz);
+      177  
+      178 +        // 14) Rainbow arc spanning between two sub-island reg
+          +ions, visible                                                 
+      179 +        //     from the spawn point as you look out past the d
+          +ome edge.                                                     
+      180 +        blocks += buildRainbow(world, cx, cy, cz);            
+      181 +                                                              
+      182 +        // 15) Crystal flower accents (amethyst clusters) scat
+          +tered low on                                                  
+      183 +        //     the dome flanks for a touch of magical glow.   
+      184 +        blocks += scatterCrystals(world, cx, cy, cz);         
+      185 +                                                              
+      186          return new Result(spawnPoint, anchors, blocks);
+      187      }
+      188  
+      189 +    /**                                                       
+      190 +     * A 7-band rainbow arc made of colored wool/concrete bloc
+          +ks, anchored                                                  
+      191 +     * just below the planet's south horizon so it's visible a
+          +bove the                                                      
+      192 +     * clouds when the player stands on the spawn slope and lo
+          +oks south.                                                    
+      193 +     * Each band is one block thick, arched in a half-circle ~
+          +22 blocks tall.                                               
+      194 +     */                                                       
+      195 +    private int buildRainbow(World w, int cx, int cy, int cz) 
+          +{                                                             
+      196 +        int placed = 0;                                       
+      197 +        // Rainbow palette (outer → inner).                   
+      198 +        Material[] bands = {                                  
+      199 +                Material.RED_WOOL,                            
+      200 +                Material.ORANGE_WOOL,                         
+      201 +                Material.YELLOW_WOOL,                         
+      202 +                Material.LIME_WOOL,                           
+      203 +                Material.LIGHT_BLUE_WOOL,                     
+      204 +                Material.BLUE_WOOL,                           
+      205 +                Material.PURPLE_WOOL                          
+      206 +        };                                                    
+      207 +        // Arc geometry — half-circle in the X-Y plane, center
+          +ed south of                                                   
+      208 +        // the planet, well below the dome so it sits in the c
+          +loud layer.                                                   
+      209 +        int arcCenterX = cx;                                  
+      210 +        int arcCenterY = cy - 18;                             
+      211 +        int arcZ       = cz + radius + 18; // far enough south
+          + to be a backdrop                                             
+      212 +        int outerR     = 30;                                  
+      213 +                                                              
+      214 +        for (int i = 0; i < bands.length; i++) {              
+      215 +            int r = outerR - i;                               
+      216 +            // Sample the half-circle densely so the band appe
+          +ars continuous.                                               
+      217 +            for (double a = 0; a <= Math.PI + 0.001; a += Math
+          +.PI / 64) {                                                   
+      218 +                int x = arcCenterX + (int) Math.round(Math.cos
+          +(a) * r);                                                     
+      219 +                int y = arcCenterY + (int) Math.round(Math.sin
+          +(a) * r);                                                     
+      220 +                Block b = w.getBlockAt(x, y, arcZ);           
+      221 +                if (!b.getType().isAir()) continue;           
+      222 +                b.setType(bands[i], false);                   
+      223 +                placed++;                                     
+      224 +            }                                                 
+      225 +        }                                                     
+      226 +        return placed;                                        
+      227 +    }                                                         
+      228 +                                                              
+      229 +    /**                                                       
+      230 +     * Scatter a handful of amethyst-cluster "crystal flowers"
+          + on the lower                                                 
+      231 +     * flanks of the dome (mid-altitude, away from the arches)
+          + for the                                                      
+      232 +     * geode-tipped magical feel of the reference image.      
+      233 +     */                                                       
+      234 +    private int scatterCrystals(World w, int cx, int cy, int c
+          +z) {                                                          
+      235 +        int placed = 0;                                       
+      236 +        Material clusterMat = matOr("AMETHYST_CLUSTER",       
+      237 +                              matOr("LARGE_AMETHYST_BUD", null
+          +));                                                           
+      238 +        Material seedMat    = matOr("AMETHYST_BLOCK", Material
+          +.PURPLE_CONCRETE);                                            
+      239 +        if (clusterMat == null && seedMat == null) return 0;  
+      240 +                                                              
+      241 +        int attempts = 0, placedClusters = 0;                 
+      242 +        while (placedClusters < 12 && attempts < 200) {       
+      243 +            attempts++;                                       
+      244 +            int dx = rng.nextInt(2 * radius) - radius;        
+      245 +            int dz = rng.nextInt(2 * radius) - radius;        
+      246 +            if (dx * dx + dz * dz > (radius - 1) * (radius - 1
+          +)) continue;                                                  
+      247 +            if (dx * dx + dz * dz < (radius - 8) * (radius - 8
+          +)) continue;                                                  
+      248 +            int sy = topSurfaceY(cy, dx, dz);                 
+      249 +            // Skip near arches.                              
+      250 +            boolean nearArch = false;                         
+      251 +            for (int[] off : PORTAL_OFFSETS) {                
+      252 +                int ddx = dx - off[0];                        
+      253 +                int ddz = dz - off[1];                        
+      254 +                if (ddx * ddx + ddz * ddz < 16) { nearArch = t
+          +rue; break; }                                                 
+      255 +            }                                                 
+      256 +            if (nearArch) continue;                           
+      257 +            Block above = w.getBlockAt(cx + dx, sy + 1, cz + d
+          +z);                                                           
+      258 +            if (!above.getType().isAir()) continue;           
+      259 +            Block ground = w.getBlockAt(cx + dx, sy, cz + dz);
+      260 +            if (ground.getType() != Material.GRASS_BLOCK) cont
+          +inue;                                                         
+      261 +            // Replace the grass tile with an amethyst block "
+          +seed", then                                                   
+      262 +            // place a cluster pointing up.                   
+      263 +            ground.setType(seedMat, false);                   
+      264 +            if (clusterMat != null) {                         
+      265 +                above.setType(clusterMat, false);             
+      266 +                BlockData cd = above.getBlockData();          
+      267 +                if (cd instanceof AmethystCluster ac) {       
+      268 +                    ac.setFacing(BlockFace.UP);               
+      269 +                    above.setBlockData(ac, false);            
+      270 +                } else if (cd instanceof Directional dir) {   
+      271 +                    dir.setFacing(BlockFace.UP);              
+      272 +                    above.setBlockData(dir, false);           
+      273 +                }                                             
+      274 +                placed++;                                     
+      275 +            }                                                 
+      276 +            placed++;                                         
+      277 +            placedClusters++;                                 
+      278 +        }                                                     
+      279 +        return placed;                                        
+      280 +    }                                                         
+      281 +                                                              
+      282      // -------------------------------------------------------
+           ----------
+      283      // Planet body
+      284      // -------------------------------------------------------
+           ----------
+
+⏺ Now make the hot-air balloon grander — taller striped envelope and a proper
+  basket:
+
+⏺ Update(src/main/java/com/agentcraft/village/SkyHubBuilder.java)
+  ⎿  Added 82 lines, removed 34 lines
+      1297          return placed;
+      1298      }
+      1299  
+      1300 -    /** A small static hot-air balloon floating below the pla
+           -net. */                                                      
+      1300 +    /**                                                      
+      1301 +     * A static hot-air balloon drifting below the planet. Th
+           +e envelope is a                                              
+      1302 +     * 5-block-tall striped sphere (red/white/yellow) with a 
+           +tapered crown,                                               
+      1303 +     * an iron-chain rigging set, and a 3x3 wicker basket of 
+           +stripped logs +                                              
+      1304 +     * scaffolding. Sits to the southwest of the planet so it
+           +'s framed by                                                 
+      1305 +     * the rainbow.                                          
+      1306 +     */                                                      
+      1307      private int buildHotAirBalloon(World w, int cx, int cy, i
+            nt cz) {
+      1308          int placed = 0;
+      1303 -        int bx = cx + 8;                                     
+      1304 -        int by = cy - 22;                                    
+      1305 -        int bz = cz + 12;                                    
+      1309 +        int bx = cx - 22;                                    
+      1310 +        int by = cy - 16;                                    
+      1311 +        int bz = cz + 14;                                    
+      1312  
+      1307 -        Material red = matOr("RED_WOOL", Material.WHITE_WOOL)
+           -;                                                            
+      1308 -        Material white = matOr("WHITE_WOOL", Material.WHITE_T
+           -ERRACOTTA);                                                  
+      1313 +        Material red    = matOr("RED_WOOL",    Material.WHITE
+           +_WOOL);                                                      
+      1314 +        Material white  = matOr("WHITE_WOOL",  Material.WHITE
+           +_TERRACOTTA);                                                
+      1315 +        Material yellow = matOr("YELLOW_WOOL", white);       
+      1316  
+      1310 -        // Balloon: small 3x3x3 wool blob with vertical strip
+           -es.                                                          
+      1311 -        // Top cap                                           
+      1312 -        w.getBlockAt(bx, by + 4, bz).setType(white, false);  
+      1317 +        // Envelope — 5x5 fat middle, 3x3 caps, single block 
+           +crown.                                                       
+      1318 +        // Vertical stripe pattern picked from (dx + dz) pari
+           +ty for an alt-color                                          
+      1319 +        // appearance.                                       
+      1320 +        Material[] palette = { red, white, yellow };         
+      1321 +                                                             
+      1322 +        // Crown (apex).                                     
+      1323 +        w.getBlockAt(bx, by + 6, bz).setType(yellow, false); 
+      1324          placed++;
+      1314 -        // Middle "fat" layer (3x3) — alternate stripes by dx
+           -.                                                            
+      1325 +                                                             
+      1326 +        // Upper cap 3x3.                                    
+      1327          for (int dx = -1; dx <= 1; dx++) {
+      1328              for (int dz = -1; dz <= 1; dz++) {
+      1317 -                if (dx == 0 && dz == 0) continue;            
+      1318 -                Material m = (Math.floorMod(dx, 2) == 0) ? re
+           -d : white;                                                   
+      1319 -                w.getBlockAt(bx + dx, by + 3, bz + dz).setTyp
+           -e(m, false);                                                 
+      1329 +                if (Math.abs(dx) + Math.abs(dz) > 2) continue
+           +;                                                            
+      1330 +                Material m = palette[Math.floorMod(dx + dz, 3
+           +)];                                                          
+      1331 +                w.getBlockAt(bx + dx, by + 5, bz + dz).setTyp
+           +e(m, false);                                                 
+      1332                  placed++;
+      1333              }
+      1334          }
+      1323 -        // Center top of middle layer                        
+      1324 -        w.getBlockAt(bx, by + 3, bz).setType(red, false);    
+      1335 +                                                             
+      1336 +        // Fat middle layers: 5x5 -> 5x5 -> 3x3 (a slightly s
+           +quished sphere).                                             
+      1337 +        for (int layerY : new int[] { by + 3, by + 4 }) {    
+      1338 +            for (int dx = -2; dx <= 2; dx++) {               
+      1339 +                for (int dz = -2; dz <= 2; dz++) {           
+      1340 +                    if (dx * dx + dz * dz > 5) continue; // r
+           +ound the corners                                             
+      1341 +                    Material m = palette[Math.floorMod(dx + d
+           +z + layerY, 3)];                                             
+      1342 +                    w.getBlockAt(bx + dx, layerY, bz + dz).se
+           +tType(m, false);                                             
+      1343 +                    placed++;                                
+      1344 +                }                                            
+      1345 +            }                                                
+      1346 +        }                                                    
+      1347 +                                                             
+      1348 +        // Lower bell — 3x3 tapering to 1.                   
+      1349 +        for (int dx = -1; dx <= 1; dx++) {                   
+      1350 +            for (int dz = -1; dz <= 1; dz++) {               
+      1351 +                if (Math.abs(dx) + Math.abs(dz) > 2) continue
+           +;                                                            
+      1352 +                Material m = palette[Math.floorMod(dx + dz + 
+           +1, 3)];                                                      
+      1353 +                w.getBlockAt(bx + dx, by + 2, bz + dz).setTyp
+           +e(m, false);                                                 
+      1354 +                placed++;                                    
+      1355 +            }                                                
+      1356 +        }                                                    
+      1357 +        // Throat (single block beneath).                    
+      1358 +        w.getBlockAt(bx, by + 1, bz).setType(red, false);    
+      1359          placed++;
+      1326 -        // Lower bell of balloon — single block beneath the c
+           -enter.                                                       
+      1327 -        w.getBlockAt(bx, by + 2, bz).setType(red, false);    
+      1328 -        placed++;                                            
+      1360  
+      1330 -        // Chains dangling.                                  
+      1331 -        for (int dy = 0; dy <= 1; dy++) {                    
+      1332 -            Block c = w.getBlockAt(bx, by + 1 - dy, bz);     
+      1333 -            c.setType(Material.IRON_CHAIN, false);           
+      1334 -            placed++;                                        
+      1361 +        // Four iron-chain rigging lines from envelope corner
+           +s down to basket.                                            
+      1362 +        for (int[] off : new int[][]{ {-1, -1}, {1, -1}, {-1,
+           + 1}, {1, 1} }) {                                             
+      1363 +            for (int dy = 0; dy <= 1; dy++) {                
+      1364 +                Block c = w.getBlockAt(bx + off[0], by - dy, 
+           +bz + off[1]);                                                
+      1365 +                c.setType(Material.IRON_CHAIN, false);       
+      1366 +                placed++;                                    
+      1367 +            }                                                
+      1368          }
+      1369  
+      1337 -        // Basket — 4 corner logs around a scaffolding center
+           -.                                                            
+      1370 +        // Wicker basket — a 3x3 ring at by-2, oak-log corner
+           +s + oak-fence rails.                                         
+      1371 +        int basketY = by - 2;                                
+      1372 +        Material logMat   = Material.STRIPPED_OAK_LOG;       
+      1373 +        Material rail     = Material.OAK_FENCE;              
+      1374          Material scaffold = matOr("SCAFFOLDING", Material.OAK
+            _PLANKS);
+      1339 -        for (int dx = -1; dx <= 0; dx++) {                   
+      1340 -            for (int dz = -1; dz <= 0; dz++) {               
+      1341 -                Block b = w.getBlockAt(bx + dx, by - 1, bz + 
+           -dz);                                                         
+      1342 -                if (Math.abs(dx) + Math.abs(dz) == 1) {      
+      1343 -                    b.setType(scaffold, false);              
+      1344 -                } else if (dx == 0 && dz == 0) {             
+      1345 -                    b.setType(scaffold, false);              
+      1346 -                } else {                                     
+      1347 -                    b.setType(Material.OAK_LOG, false);      
+      1348 -                }                                            
+      1375 +        for (int dx = -1; dx <= 1; dx++) {                   
+      1376 +            for (int dz = -1; dz <= 1; dz++) {               
+      1377 +                Block b = w.getBlockAt(bx + dx, basketY, bz +
+           + dz);                                                        
+      1378 +                boolean corner = (Math.abs(dx) == 1) && (Math
+           +.abs(dz) == 1);                                              
+      1379 +                boolean edge   = !corner && (Math.abs(dx) == 
+           +1 || Math.abs(dz) == 1);                                     
+      1380 +                if (corner) b.setType(logMat, false);        
+      1381 +                else if (edge) b.setType(rail, false);       
+      1382 +                else b.setType(scaffold, false);             
+      1383                  placed++;
+      1384              }
+      1385          }
+      1386 +        // Basket floor.                                     
+      1387 +        for (int dx = -1; dx <= 1; dx++) {                   
+      1388 +            for (int dz = -1; dz <= 1; dz++) {               
+      1389 +                w.getBlockAt(bx + dx, basketY - 1, bz + dz)  
+      1390 +                        .setType(Material.OAK_PLANKS, false);
+      1391 +                placed++;                                    
+      1392 +            }                                                
+      1393 +        }                                                    
+      1394 +        // A single tiny lantern hanging inside the basket fo
+           +r warm glow.                                                 
+      1395 +        Block lamp = w.getBlockAt(bx, basketY, bz);          
+      1396 +        lamp.setType(Material.LANTERN, false);               
+      1397 +        BlockData ld = lamp.getBlockData();                  
+      1398 +        if (ld instanceof Lantern l) { l.setHanging(false); l
+           +amp.setBlockData(l, false); }                                
+      1399 +        placed++;                                            
+      1400  
+      1401          return placed;
+      1402      }
+
+⏺ Now populate the sub-islands more — bigger set, varied content, and a tiny
+  tent/lantern on each:
+
+⏺ Update(src/main/java/com/agentcraft/village/SkyHubBuilder.java)
+  ⎿  Added 96 lines, removed 25 lines
+      1228      // Sub-islands, stars, balloon
+      1229      // ------------------------------------------------------
+            -----------
+      1230  
+      1231 -    /** A few tiny floating grass blobs below the main planet
+           -. */                                                         
+      1231 +    /**                                                      
+      1232 +     * A scattered cluster of small floating islands below th
+           +e main planet —                                              
+      1233 +     * each is a 3-5 wide grass blob with a varied feature on
+           + top: a tiny                                                 
+      1234 +     * tent, a campfire, a cherry-blossom shrub, or a single 
+           +end-rod                                                      
+      1235 +     * "wishing star". Each island is lit so they read at nig
+           +ht.                                                          
+      1236 +     */                                                      
+      1237      private int buildSubIslands(World w, int cx, int cy, int 
+            cz) {
+      1238          int placed = 0;
+      1239 +        // {dx, dy (relative to cy), dz, kind}               
+      1240 +        // kind: 0=cherry shrub, 1=tent + lantern, 2=campfire
+           + pad, 3=wishing star                                         
+      1241          int[][] islands = {
+      1235 -                {  16, -12,  10 },  // dx, dy (relative to cy
+           -), dz                                                        
+      1236 -                { -18, -14,  -6 },                           
+      1237 -                {   4, -18,  16 },                           
+      1238 -                { -10, -16, -14 }                            
+      1242 +                {  18, -10,  12, 0 },                        
+      1243 +                { -20, -12,   8, 1 },                        
+      1244 +                {   6, -16,  20, 2 },                        
+      1245 +                { -12, -14, -16, 3 },                        
+      1246 +                {  22, -18,  -8, 0 },                        
+      1247 +                { -28, -20,  -4, 1 },                        
+      1248 +                {  14, -22,  18, 2 },                        
+      1249 +                { -16, -24,  16, 0 }                         
+      1250          };
+      1251 +        Material grass  = Material.GRASS_BLOCK;              
+      1252 +        Material cherry = matOr("CHERRY_LEAVES", Material.OAK
+           +_LEAVES);                                                    
+      1253 +        Material cherryLog = matOr("CHERRY_LOG", Material.OAK
+           +_LOG);                                                       
+      1254 +                                                             
+      1255          for (int[] is : islands) {
+      1256              int ix = cx + is[0];
+      1257              int iy = cy + is[1];
+      1258              int iz = cz + is[2];
+      1259 +            int kind = is[3];                                
+      1260  
+      1245 -            // 3x3 grass blob with dirt below.               
+      1246 -            for (int dx = -1; dx <= 1; dx++) {               
+      1247 -                for (int dz = -1; dz <= 1; dz++) {           
+      1248 -                    w.getBlockAt(ix + dx, iy, iz + dz).setTyp
+           -e(Material.GRASS_BLOCK, false);                              
+      1261 +            // Slightly varied island radius (3 or 5 wide).  
+      1262 +            int rr = (kind == 1) ? 2 : 1;                    
+      1263 +            for (int dx = -rr; dx <= rr; dx++) {             
+      1264 +                for (int dz = -rr; dz <= rr; dz++) {         
+      1265 +                    int distSq = dx * dx + dz * dz;          
+      1266 +                    if (distSq > rr * rr) continue;          
+      1267 +                    w.getBlockAt(ix + dx, iy, iz + dz).setTyp
+           +e(grass, false);                                             
+      1268                      w.getBlockAt(ix + dx, iy - 1, iz + dz).se
+            tType(Material.DIRT, false);
+      1269                      w.getBlockAt(ix + dx, iy - 2, iz + dz).se
+            tType(Material.STONE, false);
+      1270                      placed += 3;
+      1271                  }
+      1272              }
+      1254 -            // A tiny tree on top.                           
+      1255 -            for (int dy = 1; dy <= 2; dy++) {                
+      1256 -                w.getBlockAt(ix, iy + dy, iz).setType(Materia
+           -l.OAK_LOG, false);                                           
+      1257 -                placed++;                                    
+      1258 -            }                                                
+      1259 -            Material leaves = matOr("CHERRY_LEAVES", Material
+           -.OAK_LEAVES);                                                
+      1260 -            for (int dx = -1; dx <= 1; dx++) {               
+      1261 -                for (int dz = -1; dz <= 1; dz++) {           
+      1262 -                    Block lb = w.getBlockAt(ix + dx, iy + 3, 
+           -iz + dz);                                                    
+      1263 -                    if (lb.getType().isAir()) {              
+      1264 -                        lb.setType(leaves, false);           
+      1273 +            // Tapered underbelly point — 1-block deepslate s
+           +talactite.                                                   
+      1274 +            w.getBlockAt(ix, iy - 3, iz)                     
+      1275 +                    .setType(matOr("COBBLED_DEEPSLATE", Mater
+           +ial.STONE), false);                                          
+      1276 +            placed++;                                        
+      1277 +                                                             
+      1278 +            switch (kind) {                                  
+      1279 +                case 0 -> { // Cherry blossom shrub.         
+      1280 +                    for (int dy = 1; dy <= 2; dy++) {        
+      1281 +                        w.getBlockAt(ix, iy + dy, iz).setType
+           +(cherryLog, false);                                          
+      1282                          placed++;
+      1283                      }
+      1284 +                    for (int dx = -1; dx <= 1; dx++) {       
+      1285 +                        for (int dz = -1; dz <= 1; dz++) {   
+      1286 +                            Block lb = w.getBlockAt(ix + dx, 
+           +iy + 3, iz + dz);                                            
+      1287 +                            if (lb.getType().isAir()) {      
+      1288 +                                lb.setType(cherry, false);   
+      1289 +                                placed++;                    
+      1290 +                            }                                
+      1291 +                        }                                    
+      1292 +                    }                                        
+      1293 +                    Block top = w.getBlockAt(ix, iy + 4, iz);
+      1294 +                    if (top.getType().isAir()) { top.setType(
+           +cherry, false); placed++; }                                  
+      1295 +                    // A poppy on the grass for color.       
+      1296 +                    Block flower = w.getBlockAt(ix + 1, iy + 
+           +1, iz);                                                      
+      1297 +                    if (flower.getType().isAir()) {          
+      1298 +                        flower.setType(Material.POPPY, false)
+           +;                                                            
+      1299 +                        placed++;                            
+      1300 +                    }                                        
+      1301                  }
+      1302 +                case 1 -> { // Tiny white-wool tent with a la
+           +ntern post.                                                  
+      1303 +                    // Base row 3 wide.                      
+      1304 +                    for (int dx = -1; dx <= 1; dx++) {       
+      1305 +                        w.getBlockAt(ix + dx, iy + 1, iz).set
+           +Type(Material.WHITE_WOOL, false);                            
+      1306 +                        placed++;                            
+      1307 +                    }                                        
+      1308 +                    w.getBlockAt(ix, iy + 2, iz).setType(Mate
+           +rial.WHITE_WOOL, false);                                     
+      1309 +                    placed++;                                
+      1310 +                    // Lantern post.                         
+      1311 +                    w.getBlockAt(ix + 2, iy + 1, iz).setType(
+           +Material.BAMBOO_FENCE, false);                               
+      1312 +                    w.getBlockAt(ix + 2, iy + 2, iz).setType(
+           +Material.BAMBOO_FENCE, false);                               
+      1313 +                    Block lamp = w.getBlockAt(ix + 2, iy + 3,
+           + iz);                                                        
+      1314 +                    lamp.setType(Material.LANTERN, false);   
+      1315 +                    BlockData d = lamp.getBlockData();       
+      1316 +                    if (d instanceof Lantern l) { l.setHangin
+           +g(false); lamp.setBlockData(l, false); }                     
+      1317 +                    placed += 3;                             
+      1318 +                }                                            
+      1319 +                case 2 -> { // Campfire pad ringed with cobbl
+           +e.                                                           
+      1320 +                    w.getBlockAt(ix, iy + 1, iz).setType(Mate
+           +rial.CAMPFIRE, false);                                       
+      1321 +                    placed++;                                
+      1322 +                    for (int dx = -1; dx <= 1; dx++) {       
+      1323 +                        for (int dz = -1; dz <= 1; dz++) {   
+      1324 +                            if (dx == 0 && dz == 0) continue;
+      1325 +                            if (Math.abs(dx) + Math.abs(dz) !
+           += 1) continue;                                               
+      1326 +                            w.getBlockAt(ix + dx, iy + 1, iz 
+           ++ dz)                                                        
+      1327 +                                    .setType(Material.COBBLES
+           +TONE, false);                                                
+      1328 +                            placed++;                        
+      1329 +                        }                                    
+      1330 +                    }                                        
+      1331 +                }                                            
+      1332 +                case 3 -> { // Wishing star: gold block + end
+           +-rod cluster.                                                
+      1333 +                    w.getBlockAt(ix, iy + 1, iz).setType(Mate
+           +rial.GOLD_BLOCK, false);                                     
+      1334 +                    Block rod = w.getBlockAt(ix, iy + 2, iz);
+      1335 +                    rod.setType(Material.END_ROD, false);    
+      1336 +                    BlockData rd = rod.getBlockData();       
+      1337 +                    if (rd instanceof Directional dir) {     
+      1338 +                        dir.setFacing(BlockFace.UP);         
+      1339 +                        rod.setBlockData(rd, false);         
+      1340 +                    }                                        
+      1341 +                    placed += 2;                             
+      1342 +                }                                            
+      1343 +                default -> {}                                
+      1344              }
+      1269 -            Block top = w.getBlockAt(ix, iy + 4, iz);        
+      1270 -            if (top.getType().isAir()) {                     
+      1271 -                top.setType(leaves, false);                  
+      1272 -                placed++;                                    
+      1273 -            }                                                
+      1345          }
+      1346          return placed;
+      1347      }
+
+⏺ Now let me build the plugin to check it compiles:
+
+⏺ Bash(cd /Users/harryedwards/agentcraft/plugin && mvn -q -pl . package 2>&1 |
+      tail -60)
+  ⎿  (No output)
+  ⎿  (timeout 3m)
+
+⏺ Bash(mvn package 2>&1 | tail -80)
+  ⎿  [INFO] Scanning for projects...
+     [INFO]
+     [INFO] ------------------< com.agentcraft:agentcraft-plugin >---------
+     … +44 lines (ctrl+o to expand)
+⏺ Bash(mvn clean package 2>&1 | tail -50)
+  ⎿  [INFO]
+     [INFO] --- resources:3.4.0:resources (default-resources) @ agentcraft-
+     plugin ---
+     … +56 lines (ctrl+o to expand)
+
+⏺ Build clean. Let me copy the JAR into the server plugins folder so the next
+  ./agentcraft rebuild or restart will pick it up:
+
+  Listed 1 directory (ctrl+o to expand)
+
+⏺ Bash(cp /Users/harryedwards/agentcraft/plugin/target/agentcraft-0.1.0.jar
+      /Users/harryedwards/agentcraft/server/plugins/agentcraft.jar && ls -la
+      /Users/harryedwards/…)
+  ⎿  -rw-r--r--@ 1 harryedwards  staff  451988 26 May 17:45 /Users/harryedw
+     ards/agentcraft/server/plugins/agentcraft.jar
+
+⏺ Plugin rebuilt and deployed cleanly. Summary of the visual upgrades to /hermes
+   skyworld build:
+
+  - Palatial temple — 7×7 marble cella with quartz-pillar corners, lit
+  light-blue stained-glass windows backed by sea lanterns, a 3-tier dome with
+  gold cornice + gold-banded rings, a 5-block-arm gold star spire, and two
+  flanking gold torch-pillars at the entrance.
+  - Grander portals — gold-block plinths at each column base, colored
+  stained-glass cheeks under the lintel (cyan / yellow / purple per slot), and
+  amethyst-cluster gem finials on top of each column.
+  - Avenue path — widened to 3 blocks (stone-brick edges + polished-andesite
+  center + gold accent every 4 blocks), with closer-spaced bamboo posts holding
+  chains and hanging lanterns.
+  - Rainbow arc — 7-band ROYGBV+ rainbow drawn south of the planet, sized to be
+  the backdrop you see looking out past the dome.
+  - Crystal flowers — amethyst clusters seeded across the dome flanks.
+  - Hot-air balloon — 5-tier striped envelope (red/white/yellow), 4 chain
+  rigging lines, real 3×3 wicker basket with planked floor and a lit interior
+  lantern, repositioned southwest under the rainbow.
+  - Sub-islands — 8 islands instead of 4, each with one of four featurettes
+  (cherry shrub, white tent + lantern post, cobble-ringed campfire, gold-block
+  "wishing star" with end rod), and a tiny deepslate stalactite under each.
+
+  To see it in-game: ./agentcraft restart (or /reload confirm in-game), then
+  /hermes skyworld build.
+
+✻ Crunched for 8m 36s
+
+❯ /goal I love it, please also, make it beautiful, and in line of the objectives of this here, the rest mini maps for each of the pages, you can even spawn sub agents to make the small games - to be in line with this, Xingye Home MVP Development Document 
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+Internal beta scope, product modules, technical architecture, data model, and delivery plan based on                                                                                                                                                           
+generated product visuals                                                                                                                                                                                                                                      
+Version MVP 0.1 / Beta internal-test build                                                                                                                                                                                                                     
+Date 2026-05-26                                                                                                                                                                                                                                                
+Audience Product, design, frontend, backend, game client, AI, and partner technical review                                                                                                                                                                     
+Core route Web/PWA parent console + Xingye World child client + unified backend + AI growth services                                                                                                                                                           
+Development Goal                                                                                                                                                                                                                                               
+Build a directly testable, demoable, feedback-ready beta: children can enter Xingye World, complete tasks, and                                                                                                                                                 
+receive star dust/star keys; parents can review tasks, learn parent-child lessons, view emotional summaries                                                                                                                                                    
+and growth reports; the system can persist tasks, rewards, emotions, and family memory data.                                                                                                                                                                   
+Figure: Product Vision Cover. Defines the overall Xingye Home positioning: a child explores Xingye World while parents understand and support growth                                                                                                           
+through the Guardian Console.                                                                                                                                                                                                                                  
+1. MVP Positioning                                                                                                                                                                                                                                             
+MVP 0.1 is a family-growth loop validation product. It is not a full commercial release, and it is not a large-scale                                                                                                                                           
+multiplayer open world. The first release should validate whether children want to return to Xingye World,                                                                                                                                                     
+whether parents are willing to use the Guardian Console, whether offline tasks can become meaningful game                                                                                                                                                      
+rewards, and whether emotional expression plus parent education can create durable family data and relationship                                                                                                                                                
+value.                                                                                                                                                                                                                                                         
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+Dimension Question To Validate Pass Criteria                                                                                                                                                                                                                   
+Child retention Will children voluntarily enter Xingye World? At least 4 active days within a 7-day period.                                                                                                                                                    
+Parent                                                                                                                                                                                                                                                         
+acceptance                                                                                                                                                                                                                                                     
+Can parents review and support without friction? Single review under 1 minute; nightly                                                                                                                                                                         
+review under 5 minutes.                                                                                                                                                                                                                                        
+Task loop Can offline actions convert into game rewards? At least 5 completed tasks per family per                                                                                                                                                             
+week.                                                                                                                                                                                                                                                          
+Emotional                                                                                                                                                                                                                                                      
+entries Will children express real thoughts by voice? At least 2 useful emotional or learning                                                                                                                                                                  
+reflections per week.                                                                                                                                                                                                                                          
+Parent learning Can parent courses affect the child-side experience? Course completion triggers growth value or                                                                                                                                                
+map unlocks.                                                                                                                                                                                                                                                   
+2. Visual Target And Experience Principles                                                                                                                                                                                                                     
+The generated visuals define the MVP direction: an original voxel open world, mobile-first controls, a clear parent                                                                                                                                            
+dashboard, and a warm but trustworthy AI assistant. Development does not need to reproduce every image                                                                                                                                                         
+detail, but it must preserve the core product language: Xingye World, portals, star dust, star keys, Guardian                                                                                                                                                  
+Console, family memory, Emotional Bin, parent-child lessons, and growth reports.                                                                                                                                                                               
+Visual Mapped Module Development Meaning                                                                                                                                                                                                                       
+Product vision cover Entry / partner demo Unified brand expression for landing page, deck, and beta login.                                                                                                                                                     
+Child-side Xingye World Child main scene Reference for map, portals, tasks, rewards, inventory, and touch UI.                                                                                                                                                  
+Guardian Console Parent home Reference for parent-side information density, cards, review entry,                                                                                                                                                               
+and rewards.                                                                                                                                                                                                                                                   
+Emotional Bin Child expression / parent summary Reference for voice input, emotion labels, AI organization, and                                                                                                                                                
+support advice.                                                                                                                                                                                                                                                
+Parent course link Parent learning / child growth Course completion affects growth value, map areas, and parent￾child tasks.                                                                                                                                   
+Growth-loop diagram System flow Exploration, review, recording, AI reports, and family memory data                                                                                                                                                             
+loop.                                                                                                                                                                                                                                                          
+Mobile beta Mobile beta packaging Dual mobile surfaces with one brand and reward vocabulary.                                                                                                                                                                   
+AI family-growth world Long-term vision AI organizes growth records and suggestions; it does not replace                                                                                                                                                       
+parents or professionals.                                                                                                                                                                                                                                      
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+3. Product Module Overview                                                                                                                                                                                                                                     
+Figure: Product Growth Loop. Explains the data loop across child exploration, parent review, system records, AI weekly reports, and family memory.                                                                                                             
+The MVP uses one family account to connect the child side and the parent side. The child side owns exploration,                                                                                                                                                
+tasks, and expression; the parent side owns review, rules, courses, and understanding; the backend owns data                                                                                                                                                   
+consistency; AI services organize, summarize, and recommend without becoming unrestricted child chat or                                                                                                                                                        
+psychological diagnosis.                                                                                                                                                                                                                                       
+Module P0 Required P1 Later                                                                                                                                                                                                                                    
+Child-side Xingye World Map, three portals, task hints, star dust/star keys, growth                                                                                                                                                                            
+value, emotional entry.                                                                                                                                                                                                                                        
+Avatar, more map zones, lightweight mini￾game instances.                                                                                                                                                                                                       
+Parent Guardian Console Daily status, pending reviews, time rules, reward grant,                                                                                                                                                                               
+courses, emotional summary.                                                                                                                                                                                                                                    
+Custom tasks, custom rewards, full weekly                                                                                                                                                                                                                      
+report export.                                                                                                                                                                                                                                                 
+Task System System tasks, offline tasks, child self-confirmation, parent                                                                                                                                                                                       
+review, nightly digest.                                                                                                                                                                                                                                        
+Task template market, teacher-published                                                                                                                                                                                                                        
+tasks.                                                                                                                                                                                                                                                         
+Reward System Star dust, star keys, growth value, map/decor unlocks. Achievement book, long-term levels, limited                                                                                                                                               
+decorations.                                                                                                                                                                                                                                                   
+Emotional Bin Voice input, transcription, labels, privacy choice, AI summary. Trend analysis and parent communication                                                                                                                                          
+advice library.                                                                                                                                                                                                                                                
+Parent Education 2-3 beta lessons, completion tracking, child-side linkage. Course system and teacher content                                                                                                                                                  
+backend.                                                                                                                                                                                                                                                       
+Backend And AI Family account, tasks, rewards, event logs, speech-to-text,                                                                                                                                                                                     
+summaries.                                                                                                                                                                                                                                                     
+Personalized recommendation and long￾term personal-agent data layer.                                                                                                                                                                                           
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+4. Child Side: Xingye World                                                                                                                                                                                                                                    
+Figure: Child-Side Xingye World. Defines the child-side core experience: portals, quests, star dust, star keys, map, inventory, rewards, and touch                                                                                                             
+controls.                                                                                                                                                                                                                                                      
+4.1 Core Screens                                                                                                                                                                                                                                               
+Screen Goal Key Components                                                                                                                                                                                                                                     
+C01 Xingye World Home Let the child enter a personal growth world. Map, character, portals, task overlay, star dust/star keys,                                                                                                                                 
+growth value, inventory, bottom navigation.                                                                                                                                                                                                                    
+C02 Portal Panel Make content categories feel like world                                                                                                                                                                                                       
+objects.                                                                                                                                                                                                                                                       
+Game Portal, Learning Portal, Task Portal states; lock reason;                                                                                                                                                                                                 
+recommended alternatives.                                                                                                                                                                                                                                      
+C03 Task Detail Make tasks feel like adventure goals, not                                                                                                                                                                                                      
+homework.                                                                                                                                                                                                                                                      
+Objective, estimated time, reward, evidence type, review                                                                                                                                                                                                       
+requirement.                                                                                                                                                                                                                                                   
+C04 Reward Claim Create strong positive feedback. Star dust, star keys, growth value, unlock animation, next                                                                                                                                                   
+recommendation.                                                                                                                                                                                                                                                
+C05 Emotional Bin Entry Encourage children to express inner                                                                                                                                                                                                    
+thoughts.                                                                                                                                                                                                                                                      
+Voice button, mood labels, visibility choice, sync-to-family￾memory option.                                                                                                                                                                                    
+4.2 First-Release Gameplay Requirements                                                                                                                                                                                                                        
+ Mobile-first, while desktop browser support remains useful for development and demos.                                                                                                                                                                        
+ Main child loop: enter world -> choose portal -> complete task/lesson/expression -> receive reward -> unlock map                                                                                                                                             
+or decoration.                                                                                                                                                                                                                                                 
+ Game Portal is locked during entertainment-restricted periods; Learning Portal, Task Portal, and Emotional Bin may                                                                                                                                           
+remain available.                                                                                                                                                                                                                                              
+ Star dust supports normal exchange and decoration; star keys unlock key map areas, buildings, or story nodes.                                                                                                                                                
+ The first release should not include stranger social, leaderboards, paid lottery, complex combat, or public chat.                                                                                                                                            
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+4.3 Acceptance Criteria                                                                                                                                                                                                                                        
+Item Standard                                                                                                                                                                                                                                                  
+Enter world After child login, the main scene loads within 3 seconds and shows portals plus reward status.                                                                                                                                                     
+Complete task The child can start at least 3 preset tasks and submit text, image, or self-confirmation                                                                                                                                                         
+evidence.                                                                                                                                                                                                                                                      
+Reward feedback After approval or self-confirmation, star dust/star keys/growth value update immediately and                                                                                                                                                   
+write an event log.                                                                                                                                                                                                                                            
+Lock rule When Game Portal is locked, the page recommends Learning Portal or Task Portal without                                                                                                                                                               
+punitive wording.                                                                                                                                                                                                                                              
+Data persistence After refresh or login again, rewards, task status, and basic world progress remain intact.                                                                                                                                                   
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+5. Parent Side: Guardian Console / Family Memory                                                                                                                                                                                                               
+Figure: Parent Guardian Console. Defines the parent-side information architecture: daily status, task review, time rules, parent-learning courses,                                                                                                             
+emotional summaries, weekly reports, and rewards.                                                                                                                                                                                                              
+The parent side is not heavy control software. It must reduce review and support cost. The home screen should                                                                                                                                                  
+quickly show today's child status, pending items, time rules, parent-child courses, emotional summary, weekly                                                                                                                                                  
+growth report, and reward assets.                                                                                                                                                                                                                              
+Screen P0 Function Interaction Requirement                                                                                                                                                                                                                     
+P01 Guardian Home Daily status, task review, time rules, lessons, emotional                                                                                                                                                                                    
+summary, report, rewards.                                                                                                                                                                                                                                      
+All core information must be scannable in one                                                                                                                                                                                                                  
+screen; pending actions must be obvious.                                                                                                                                                                                                                       
+P02 Review List Pending, approved, needs more, and self-confirmation                                                                                                                                                                                           
+digest.                                                                                                                                                                                                                                                        
+Batch viewing is allowed, but each item should                                                                                                                                                                                                                 
+have no more than 3 actions.                                                                                                                                                                                                                                   
+P03 Review Detail Evidence, child note, approve/need more/reject, parent                                                                                                                                                                                       
+feedback.                                                                                                                                                                                                                                                      
+Default short feedback templates reduce parent                                                                                                                                                                                                                 
+writing effort.                                                                                                                                                                                                                                                
+P04 Time Rules Game Portal availability, session length, content level. Copy must be gentle and avoid creating parent￾child conflict.                                                                                                                          
+P05 Family Memory Key tasks, emotions, and feedback are automatically                                                                                                                                                                                          
+stored. Show as a timeline, not as surveillance logs.                                                                                                                                                                                                          
+P06 Parent Courses 2-3 MVP lessons, completion links to child-side growth. Short, watchable, and connected to concrete                                                                                                                                         
+support actions.                                                                                                                                                                                                                                               
+5.1 Low-Friction Review                                                                                                                                                                                                                                        
+Core principle: do not force parents into daily check-in labor. Ordinary tasks should support child self￾confirmation and nightly review; high-value or parent-child tasks can require immediate confirmation.                                                 
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+Review Mode Best For Reward Policy                                                                                                                                                                                                                             
+Child self-confirmation Desk cleanup, 10-minute reading, learning reflection. Grant base reward first; add to nightly                                                                                                                                          
+digest.                                                                                                                                                                                                                                                        
+Immediate parent review Parent-child task, outdoor activity, photo-required task. Grant full reward after approval.                                                                                                                                            
+Nightly digest All same-day low-risk self-confirmed tasks. Parent can add feedback, spot-check, or                                                                                                                                                             
+revoke abnormal rewards.                                                                                                                                                                                                                                       
+6. Emotional Bin                                                                                                                                                                                                                                               
+Figure: Emotional Bin. Defines the child expression flow: voice-to-text, emotion categories, AI organization, parent summaries, and suggested support                                                                                                          
+actions.                                                                                                                                                                                                                                                       
+The Emotional Bin is one of the most important child-side data entry points. It is not designed for psychological                                                                                                                                              
+diagnosis. It encourages children to speak about happy moments, difficult moments, learning reflections, and                                                                                                                                                   
+things they want to tell parents, then uses AI to organize and summarize the content.                                                                                                                                                                          
+Child taps Emotional Bin                                                                                                                                                                                                                                       
+ -> choose a mood label or hold to speak                                                                                                                                                                                                                       
+ -> speech-to-text                                                                                                                                                                                                                                             
+ -> AI organizes into: happy things / difficult things / learning reflections /                                                                                                                                                                                
+things to tell parents                                                                                                                                                                                                                                         
+ -> child chooses: private / sync to family memory / anonymous summary only                                                                                                                                                                                    
+ -> receive a small growth value or star dust reward                                                                                                                                                                                                           
+ -> parent sees summary and support suggestion, not full text by default                                                                                                                                                                                       
+Field Description Privacy Requirement                                                                                                                                                                                                                          
+emotion_id Unique emotional entry ID. Generated by backend.                                                                                                                                                                                                    
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+mood_label Happy, calm, worried, tired, angry, etc. Child-selected; never treated as diagnosis.                                                                                                                                                                
+audio_url Original voice file. MVP may avoid long-term storage and keep                                                                                                                                                                                        
+transcript only.                                                                                                                                                                                                                                               
+transcript_text Speech-to-text result. Private by default.                                                                                                                                                                                                     
+summary_text AI summary.                                                                                                                                                                                                                                       
+Parent side sees summary rather than full text by                                                                                                                                                                                                              
+default.                                                                                                                                                                                                                                                       
+visibility private / family_summary / family_memory. Child can understand and choose visibility.                                                                                                                                                               
+risk_flag Sensitive-risk flag. Triggers gentle parent-side reminder, not public                                                                                                                                                                                
+display.                                                                                                                                                                                                                                                       
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+7. Parent Education Linked To Growth Value                                                                                                                                                                                                                     
+Figure: Parent Courses Linked To Growth. Defines how parent learning can influence child-side map unlocks, growth value, star dust, and parent-child                                                                                                           
+tasks.                                                                                                                                                                                                                                                         
+Parent education is not an isolated course module. It is a core trust asset on the parent side. The MVP can start                                                                                                                                              
+with 2-3 self-recorded short videos to test whether parents are willing to learn and whether course completion                                                                                                                                                 
+can produce positive child-side feedback.                                                                                                                                                                                                                      
+Course Parent-Side Goal Child-Side Linkage                                                                                                                                                                                                                     
+Hear Before Explaining Teach parents to reflect a child's feeling before                                                                                                                                                                                       
+giving advice.                                                                                                                                                                                                                                                 
+Unlock parent-child task: share one moment                                                                                                                                                                                                                     
+of being understood.                                                                                                                                                                                                                                           
+Notice The Effort Shift feedback from result-only to process                                                                                                                                                                                                   
+recognition.                                                                                                                                                                                                                                                   
+Task completion receives +10% growth                                                                                                                                                                                                                           
+value.                                                                                                                                                                                                                                                         
+Low-Conflict Game-Time Talk Turn time rules into cooperation rather than                                                                                                                                                                                       
+argument.                                                                                                                                                                                                                                                      
+Game Portal lock copy becomes softer and                                                                                                                                                                                                                       
+more constructive.                                                                                                                                                                                                                                             
+7.1 Course Data                                                                                                                                                                                                                                                
+Object Key Fields                                                                                                                                                                                                                                              
+ParentCourse course_id, title, duration_minutes, cover_url, video_url, lesson_summary, linked_effect                                                                                                                                                           
+CourseProgress family_id, parent_user_id, course_id, progress_percent, completed_at                                                                                                                                                                            
+GrowthEffect effect_type, target_child_id, value, unlock_id, expires_at, source_course_id                                                                                                                                                                      
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+8. Mobile Beta Information Architecture                                                                                                                                                                                                                        
+Figure: Mobile Beta Preview. Defines the dual-entry mobile beta: Xingye World and the Guardian Console share the same brand and reward language.                                                                                                               
+Side Bottom Navigation First Release Scope                                                                                                                                                                                                                     
+Child side Explore, Tasks, Star Wish, Inventory, Me. Explore, Tasks, and Star Wish must work;                                                                                                                                                                  
+Inventory and Me may be simplified.                                                                                                                                                                                                                            
+Parent side Home, Guard, Communicate, Discover, Me. Home, Guard, and Communicate must work;                                                                                                                                                                    
+Discover can initially host parent courses.                                                                                                                                                                                                                    
+Mobile Implementation Recommendation                                                                                                                                                                                                                           
+Prioritize PWA / WebView / mini-program-like layouts for the first release. Avoid maintaining multiple native                                                                                                                                                  
+clients at once. The child-side game can start with the Web voxel MVP while the Luanti Android track is                                                                                                                                                        
+integrated in parallel.                                                                                                                                                                                                                                        
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+9. Technical Architecture                                                                                                                                                                                                                                      
+Figure: AI Family Growth Open World. Defines the long-term vision: AI connects tasks, learning, interests, habits, parent support, and growth profiles.                                                                                                        
+9.1 Recommended Technical Route                                                                                                                                                                                                                                
+Layer Recommendation Notes                                                                                                                                                                                                                                     
+Child client Web voxel MVP + Luanti Android in parallel Web supports fast beta; Luanti becomes the richer Xingye                                                                                                                                               
+World client.                                                                                                                                                                                                                                                  
+Parent side React / Next.js / mini-program-compatible UI Card-based Guardian Console, reviews, courses, and reports.                                                                                                                                           
+Backend Node.js / NestJS or Supabase Family accounts, tasks, rewards, event logs, permissions.                                                                                                                                                                 
+Database PostgreSQL Structured family, task, reward, emotion, and course data.                                                                                                                                                                                 
+Storage S3/R2/OSS-style object storage Task images, course videos, voice files.                                                                                                                                                                                
+AI services Speech-to-text + summary + weekly report No unrestricted chat or psychological diagnosis in the first                                                                                                                                              
+release.                                                                                                                                                                                                                                                       
+Analytics Event logs + simple funnel Enter, task start, submit, review, reward, emotional entry.                                                                                                                                                               
+9.2 System Layers                                                                                                                                                                                                                                              
+Clients                                                                                                                                                                                                                                                        
+ - Child-side Xingye World: exploration, portals, tasks, rewards, Emotional Bin                                                                                                                                                                                
+ - Parent Guardian Console: reviews, time rules, courses, reports, family memory                                                                                                                                                                               
+ - Operator backend: task templates, course content, risk records, analytics                                                                                                                                                                                   
+dashboard                                                                                                                                                                                                                                                      
+Backend Services                                                                                                                                                                                                                                               
+ - User and family account                                                                                                                                                                                                                                     
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+ - Child profile and permissions                                                                                                                                                                                                                               
+ - Task submission and review                                                                                                                                                                                                                                  
+ - Rewards, growth value, and unlocks                                                                                                                                                                                                                          
+ - Emotional entries and family memory                                                                                                                                                                                                                         
+ - Courses and linked growth effects                                                                                                                                                                                                                           
+ - AI summaries and weekly reports                                                                                                                                                                                                                             
+ - Event logs and analytics                                                                                                                                                                                                                                    
+9.3 Luanti Integration Boundary                                                                                                                                                                                                                                
+ Luanti should not host the parent console or operator backend; it should own only the playable child-side world.                                                                                                                                             
+ Luanti Lua mods sync task completion, reward claiming, map unlocks, and event logs through HTTP APIs.                                                                                                                                                        
+ Accounts, family relationships, review status, and emotional data must be server-authoritative.                                                                                                                                                              
+ In the first technical demo, Luanti can use a test account and fixed family ID to validate star dust, star keys, portals,                                                                                                                                    
+and task events.                                                                                                                                                                                                                                               
+10. Core Data Model                                                                                                                                                                                                                                            
+Object Purpose Key Fields                                                                                                                                                                                                                                      
+Family Family unit. id, family_name, parent_user_ids, child_user_ids, created_at                                                                                                                                                                               
+User Logged-in user. id, role, nickname, avatar_url, family_id, created_at                                                                                                                                                                                     
+ChildProfile Child profile. user_id, age_range, grade, interests, guardian_settings                                                                                                                                                                            
+Portal World portal. id, type, title, lock_state, lock_reason, recommended_portal_ids                                                                                                                                                                          
+Task Task template. id, type, title, child_brief, parent_brief, evidence_required, reward_policy                                                                                                                                                               
+TaskSubmission Child submission. id, task_id, child_user_id, evidence_text, media_urls, status                                                                                                                                                                 
+Review Parent review. id, submission_id, reviewer_id, action, parent_feedback, reviewed_at                                                                                                                                                                     
+RewardLedger Reward ledger. id, child_user_id, reward_type, amount, source_type, source_id                                                                                                                                                                     
+Unlock Map/decor unlock. id, child_user_id, unlock_type, title, source_reward_id                                                                                                                                                                               
+EmotionEntry Emotional Bin record. id, child_user_id, mood_label, transcript_text, summary_text, visibility                                                                                                                                                    
+ParentCourse Parent education course. id, title, video_url, duration, linked_effect                                                                                                                                                                            
+MemoryEntry Family memory. id, family_id, child_user_id, source_type, title, content, created_at                                                                                                                                                               
+11. API Draft                                                                                                                                                                                                                                                  
+Method Path Description                                                                                                                                                                                                                                        
+POST /auth/demo-login Demo login for beta; returns parent/child token.                                                                                                                                                                                         
+GET /families/current Fetch current family, members, and child profile.                                                                                                                                                                                        
+GET /child/world-state Fetch child world state, rewards, tasks, and portal state.                                                                                                                                                                              
+POST /tasks/{id}/start Child starts a task.                                                                                                                                                                                                                    
+POST /task-submissions Child submits evidence or self-confirmation.                                                                                                                                                                                            
+GET /parent/reviews Parent fetches pending reviews and nightly digest.                                                                                                                                                                                         
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+POST /reviews/{id}/action Parent approves, requests more, or rejects.                                                                                                                                                                                          
+POST /rewards/grant Server grants star dust, star keys, growth value, or unlocks.                                                                                                                                                                              
+POST /emotion-entries Create emotional entry after voice/text input.                                                                                                                                                                                           
+POST /ai/emotion-summary Generate emotional summary and support suggestion.                                                                                                                                                                                    
+POST /courses/{id}/complete Complete parent course and trigger child-side linkage.                                                                                                                                                                             
+GET /weekly-report Fetch family growth weekly report.                                                                                                                                                                                                          
+POST /events Unified client event logging.                                                                                                                                                                                                                     
+12. Events And Metrics                                                                                                                                                                                                                                         
+Event Trigger Core Properties                                                                                                                                                                                                                                  
+app_open User opens the product. role, family_id, device, source                                                                                                                                                                                               
+world_enter Child enters Xingye World. child_id, session_id                                                                                                                                                                                                    
+portal_click User taps a portal. portal_type, lock_state                                                                                                                                                                                                       
+task_start Child starts a task. task_id, task_type                                                                                                                                                                                                             
+task_submit Child submits task. submission_id, evidence_type, review_mode                                                                                                                                                                                      
+review_action Parent reviews task. action, review_duration, reward_amount                                                                                                                                                                                      
+reward_grant Reward is granted. reward_type, amount, source                                                                                                                                                                                                    
+unlock_complete Unlock is completed. unlock_type, title                                                                                                                                                                                                        
+emotion_record Emotional record is completed. mood_label, visibility, transcript_length                                                                                                                                                                        
+course_complete Parent completes a course. course_id, linked_effect                                                                                                                                                                                            
+weekly_report_view Parent views weekly report. family_id, week                                                                                                                                                                                                 
+Core Metrics                                                                                                                                                                                                                                                   
+7-day child retention, weekly completed tasks, parent review completion rate, average review time, emotional￾entry frequency, course completion rate, reward claim rate, and alternative-entry click rate after Game Portal                                    
+lock.                                                                                                                                                                                                                                                          
+13. Development Milestones                                                                                                                                                                                                                                     
+Phase Duration Goal Deliverable                                                                                                                                                                                                                                
+Sprint 0 3-5 days Set up project skeleton and visual assets. Routes, style system, demo data, image                                                                                                                                                            
+assets, basic deployment.                                                                                                                                                                                                                                      
+Sprint 1 1 week Complete child-side Xingye World core loop. Map home, portals, task start/submit, reward                                                                                                                                                       
+update.                                                                                                                                                                                                                                                        
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+Sprint 2 1 week Complete Guardian Console and low-friction review. Home, review list/detail, time rules, family                                                                                                                                                
+memory.                                                                                                                                                                                                                                                        
+Sprint 3 1 week Add Emotional Bin, parent courses, and AI                                                                                                                                                                                                      
+summaries.                                                                                                                                                                                                                                                     
+Voice/text entries, summaries, course                                                                                                                                                                                                                          
+completion, growth linkage.                                                                                                                                                                                                                                    
+Sprint 4 1 week Unify backend and analytics, prepare 20-50 family                                                                                                                                                                                              
+beta.                                                                                                                                                                                                                                                          
+Accounts, APIs, event logs, weekly report,                                                                                                                                                                                                                     
+export, feedback form.                                                                                                                                                                                                                                         
+Parallel Ongoing Luanti Android technical validation. Xingye World game/mod, star dust/star                                                                                                                                                                    
+keys/portals, HTTP sync demo.                                                                                                                                                                                                                                  
+14. Testing And Acceptance                                                                                                                                                                                                                                     
+Type Focus Pass Condition                                                                                                                                                                                                                                      
+Functional Login, family binding, tasks, reviews, rewards, emotions,                                                                                                                                                                                           
+courses.                                                                                                                                                                                                                                                       
+P0 flows have no blocking issues and key states recover.                                                                                                                                                                                                       
+Experience Child understands next step; parent completes review                                                                                                                                                                                                
+quickly.                                                                                                                                                                                                                                                       
+First-time users can finish the main flow without a                                                                                                                                                                                                            
+manual.                                                                                                                                                                                                                                                        
+Data Reward ledger, task status, family memory, event logs. Refresh, re-login, and cross-side views remain                                                                                                                                                     
+consistent.                                                                                                                                                                                                                                                    
+Safety Child privacy, parent permission, upload handling, AI output. Unauthorized users cannot access family data; risk                                                                                                                                        
+content has fallback.                                                                                                                                                                                                                                          
+Compatibility iPhone Safari, Android Chrome, desktop Chrome. No major overlap, horizontal scroll, or unclickable                                                                                                                                               
+buttons.                                                                                                                                                                                                                                                       
+Beta 20-50 families use the product continuously. Collect retention, task, review, emotion, course, and                                                                                                                                                        
+feedback data.                                                                                                                                                                                                                                                 
+15. Risks And Boundaries                                                                                                                                                                                                                                       
+ No open stranger social features, direct child-to-child chat, or ranking-based comparison.                                                                                                                                                                   
+ No recharge system, lottery, NFT, cash-out virtual currency, or addiction-driven reward loops.                                                                                                                                                               
+ AI first release only supports transcription, organization, summary, recommendation, and reports; it must not                                                                                                                                                
+provide medical or psychological diagnosis.                                                                                                                                                                                                                    
+ Minor data is private by default. Task photos, voice, emotional records, and family-relationship data must support                                                                                                                                           
+deletion, authorization, and audit.                                                                                                                                                                                                                            
+ The compliance boundary between locked game content and open learning/task content needs legal review before                                                                                                                                                 
+commercial release.                                                                                                                                                                                                                                            
+ Minecraft is only a gameplay reference. The product should not use Minecraft branding, official assets, or                                                                                                                                                   
+commercial ecosystem as its production foundation.                                                                                                                                                                                                             
+16. Development Deliverables                                                                                                                                                                                                                                   
+Deliverable Owner Completion Standard                                                                                                                                                                                                                          
+Product prototype Product / Design Covers child side, parent side, Emotional Bin, parent courses, weekly report.                                                                                                                                               
+Frontend beta Frontend PWA runs end to end, main flows complete, mobile adapted.                                                                                                                                                                               
+Xingye Home MVP Development Document                                                                                                                                                                                                                           
+Backend services Backend APIs, database, object storage, permissions, event logs available.                                                                                                                                                                    
+AI services AI / Backend Speech-to-text, summaries, weekly reports, and safety fallback available.                                                                                                                                                             
+Luanti technical demo Game client Android debug build supports portals, star dust, star keys, and task events.                                                                                                                                                 
+Operator config Product / Ops Task templates, reward config, course content, review feedback templates.                                                                                                                                                        
+Beta materials Product / Ops Demo accounts, parent guide, feedback form, analytics dashboard.                                                                                                                                                                  
+Appendix: Visual Asset Index                                                                                                                                                                                                                                   
+File Document Use Source File                                                                                                                                                                                                                                  
+01_cover_product_overview.png Product Vision Cover                                                                                                                                                                                                             
+/Users/qidu/Documents/code/xingye-home/deliverables/                                                                                                                                                                                                           
+mvp_development_doc/assets/                                                                                                                                                                                                                                    
+01_cover_product_overview.png                                                                                                                                                                                                                                  
+02_child_world_gameplay.png Child-Side Xingye World                                                                                                                                                                                                            
+/Users/qidu/Documents/code/xingye-home/deliverables/                                                                                                                                                                                                           
+mvp_development_doc/assets/                                                                                                                                                                                                                                    
+02_child_world_gameplay.png                                                                                                                                                                                                                                    
+03_parent_guardian_console.png Parent Guardian Console                                                                                                                                                                                                         
+/Users/qidu/Documents/code/xingye-home/deliverables/                                                                                                                                                                                                           
+mvp_development_doc/assets/                                                                                                                                                                                                                                    
+03_parent_guardian_console.png                                                                                                                                                                                                                                 
+04_emotional_bin.png Emotional Bin /Users/qidu/Documents/code/xingye-home/deliverables/                                                                                                                                                                        
+mvp_development_doc/assets/04_emotional_bin.png                                                                                                                                                                                                                
+05_parent_course_growth_link.png Parent Courses Linked To Growth                                                                                                                                                                                               
+/Users/qidu/Documents/code/xingye-home/deliverables/                                                                                                                                                                                                           
+mvp_development_doc/assets/                                                                                                                                                                                                                                    
+05_parent_course_growth_link.png                                                                                                                                                                                                                               
+06_growth_loop_architecture.png Product Growth Loop                                                                                                                                                                                                            
+/Users/qidu/Documents/code/xingye-home/deliverables/                                                                                                                                                                                                           
+mvp_development_doc/assets/                                                                                                                                                                                                                                    
+06_growth_loop_architecture.png                                                                                                                                                                                                                                
+07_mobile_beta_preview.png Mobile Beta Preview /Users/qidu/Documents/code/xingye-home/deliverables/                                                                                                                                                            
+mvp_development_doc/assets/07_mobile_beta_preview.png                                                                                                                                                                                                          
+08_ai_family_growth_world.png AI Family Growth Open World                                                                                                                                                                                                      
+/Users/qidu/Documents/code/xingye-home/deliverables/                                                                                                                                                                                                           
+mvp_development_doc/assets/                                                                                                                                                                                                                                    
+08_ai_family_growth_world.png                                                                                                                                                                                                                                  
+Note: The embedded concept visuals currently contain Chinese UI labels. For an external English launch deck or website, generate localized                                                                                                                     
+English visual variants before publication.                                                                                                                                                                                                                    
+  ⎿  Goal condition is limited to 4000 characters (got 23389)
+
+❯ I love it, please also, make it beautiful, and in line of the objectives of   
+  this here, the rest mini maps for each of the pages, you can even spawn sub   
+  agents to make the small games - to be in line with this, Xingye Home MVP     
+  Development Document                                                          
+  Xingye Home MVP Development Document                                          
+  Internal beta scope, product modules, technical architecture, data model, and 
+   delivery plan based on                                                       
+  generated product visuals                                                     
+  Version MVP 0.1 / Beta internal-test build                                    
+  Date 2026-05-26                                                               
+  Audience Product, design, frontend, backend, game client, AI, and partner     
+  technical review                                                              
+  Core route Web/PWA parent console + Xingye World child client + unified       
+  backend + AI growth services                                                  
+  Development Goal                                                              
+  Build a directly testable, demoable, feedback-ready beta: children can enter  
+  Xingye World, complete tasks, and                                             
+  receive star dust/star keys; parents can review tasks, learn parent-child     
+  lessons, view emotional summaries                                             
+  and growth reports; the system can persist tasks, rewards, emotions, and      
+  family memory data.                                                           
+  Figure: Product Vision Cover. Defines the overall Xingye Home positioning: a  
+  child explores Xingye World while parents understand and support growth       
+  through the Guardian Console.                                                 
+  1. MVP Positioning                                                            
+  MVP 0.1 is a family-growth loop validation product. It is not a full          
+  commercial release, and it is not a large-scale                               
+  multiplayer open world. The first release should validate whether children    
+  want to return to Xingye World,                                               
+  whether parents are willing to use the Guardian Console, whether offline      
+  tasks can become meaningful game                                              
+  rewards, and whether emotional expression plus parent education can create    
+  durable family data and relationship                                          
+  value.                                                                        
+  Xingye Home MVP Development Document                                          
+  Dimension Question To Validate Pass Criteria                                  
+  Child retention Will children voluntarily enter Xingye World? At least 4      
+  active days within a 7-day period.                                            
+  Parent                                                                        
+  acceptance                                                                    
+  Can parents review and support without friction? Single review under 1        
+  minute; nightly                                                               
+  review under 5 minutes.                                                       
+  Task loop Can offline actions convert into game rewards? At least 5 completed 
+   tasks per family per                                                         
+  week.                                                                         
+  Emotional                                                                     
+  entries Will children express real thoughts by voice? At least 2 useful       
+  emotional or learning                                                         
+  reflections per week.                                                         
+  Parent learning Can parent courses affect the child-side experience? Course   
+  completion triggers growth value or                                           
+  map unlocks.                                                                  
+  2. Visual Target And Experience Principles                                    
+  The generated visuals define the MVP direction: an original voxel open world, 
+   mobile-first controls, a clear parent                                        
+  dashboard, and a                                                              
+  ──── (308 lines hidden) ───────────────────────────────────────────────────── 
+  ease.                                                                         
+   Minecraft is only a gameplay reference. The product should not use          
+  Minecraft branding, official assets, or                                       
+  commercial ecosystem as its production foundation.                            
+  16. Development Deliverables                                                  
+  Deliverable Owner Completion Standard                                         
+  Product prototype Product / Design Covers child side, parent side, Emotional  
+  Bin, parent courses, weekly report.                                           
+  Frontend beta Frontend PWA runs end to end, main flows complete, mobile       
+  adapted.                                                                      
+  Xingye Home MVP Development Document                                          
+  Backend services Backend APIs, database, object storage, permissions, event   
+  logs available.                                                               
+  AI services AI / Backend Speech-to-text, summaries, weekly reports, and       
+  safety fallback available.                                                    
+  Luanti technical demo Game client Android debug build supports portals, star  
+  dust, star keys, and task events.                                             
+  Operator config Product / Ops Task templates, reward config, course content,  
+  review feedback templates.                                                    
+  Beta materials Product / Ops Demo accounts, parent guide, feedback form,      
+  analytics dashboard.                                                          
+  Appendix: Visual Asset Index                                                  
+  File Document Use Source File                                                 
+  01_cover_product_overview.png Product Vision Cover                            
+  /Users/qidu/Documents/code/xingye-home/deliverables/                          
+  mvp_development_doc/assets/                                                   
+  01_cover_product_overview.png                                                 
+  02_child_world_gameplay.png Child-Side Xingye World                           
+  /Users/qidu/Documents/code/xingye-home/deliverables/                          
+  mvp_development_doc/assets/                                                   
+  02_child_world_gameplay.png                                                   
+  03_parent_guardian_console.png Parent Guardian Console                        
+  /Users/qidu/Documents/code/xingye-home/deliverables/                          
+  mvp_development_doc/assets/                                                   
+  03_parent_guardian_console.png                                                
+  04_emotional_bin.png Emotional Bin                                            
+  /Users/qidu/Documents/code/xingye-home/deliverables/                          
+  mvp_development_doc/assets/04_emotional_bin.png                               
+  05_parent_course_growth_link.png Parent Courses Linked To Growth              
+  /Users/qidu/Documents/code/xingye-home/deliverables/                          
+  mvp_development_doc/assets/                                                   
+  05_parent_course_growth_link.png                                              
+  06_growth_loop_architecture.png Product Growth Loop                           
+  /Users/qidu/Documents/code/xingye-home/deliverables/                          
+  mvp_development_doc/assets/                                                   
+  06_growth_loop_architecture.png                                               
+  07_mobile_beta_preview.png Mobile Beta Preview                                
+  /Users/qidu/Documents/code/xingye-home/deliverables/                          
+  mvp_development_doc/assets/07_mobile_beta_preview.png                         
+  08_ai_family_growth_world.png AI Family Growth Open World                     
+  /Users/qidu/Documents/code/xingye-home/deliverables/                          
+  mvp_development_doc/assets/                                                   
+  08_ai_family_growth_world.png                                                 
+  Note: The embedded concept visuals currently contain Chinese UI labels. For   
+  an external English launch deck or website, generate localized                
+  English visual variants before publication.                                   
+
+⏺ Got it — let me extend the beauty pass to the destination islands so each one
+  reads as a real Xingye mini-zone: Game Portal = star-dust parkour, Learning
+  Portal = growth-tree star library, Task Portal = star-key quest yard. I'll do
+  these as targeted enhancements to SkyIslands.java and dispatch three
+  sub-agents in parallel worktrees so the work happens concurrently.
+
+  First let me create tasks and kick off three parallel workers:
+
+⏺ 3 background agents launched (↓ to manage)
+   ├ Game Island parkour enhancement
+   ├ Learning Island growth-tree enhancement
+   └ Task Island star-key enhancement
+
+⏺ Three sub-agents launched in parallel — each in its own worktree, each
+  enhancing one island method in SkyIslands.java:
+
+  - Game Island (游戏门) — star-dust parkour course + key-shaped finish pedestal
+  - Learning Island (学习门) — central growth-tree, knowledge stations, amethyst
+   "growth value" pillars
+  - Task Island (任务门) — star-key reward pedestal + Daily/Weekly/Family task
+  obelisks
+
+  I'll wait for them to finish, then merge their branches into main and rebuild
+  the plugin. While they work, let me note that the Xingye design language (star
+   dust ☆, star keys 🗝, growth value 🌱, parent-side warmth) is now wired into
+  in-world signage on each destination island. I'll hold here for completion
+  notifications.
+
+✻ Cogitated for 2m 12s
+
+⏺ Agent "Game Island parkour enhancement" completed · 1m 30s
+
+⏺ Game Island agent done. Waiting for the other two.
+
+✻ Cooked for 3s
+
+⏺ Agent "Learning Island growth-tree enhancement" completed · 3m 28s
+
+⏺ Learning Island agent landed on main. Game Island agent done but its branch
+  wasn't auto-merged — I'll handle the merge once Task Island finishes.
+
+✻ Cooked for 3s
+
+⏺ Agent "Task Island star-key enhancement" completed · 4m 21s
+⏺ Bash(cd /Users/harryedwards/agentcraft && git status && echo "---" && git log
+      --oneline -10 && echo "---" && git worktree list && echo "---" && git
+      branch -a)
+  ⎿  On branch main
+     Changes not staged for commit:
+       (use "git add/rm <file>..." to update what will be committed)
+     … +69 lines (ctrl+o to expand)
+
+⏺ All three commits landed cleanly on main. Let me verify the file has all the
+  enhancements stitched together and that my earlier SkyHubBuilder changes are
+  still in the working tree:
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ All three enhancements are present in SkyIslands.java. Now let me rebuild and
+  verify everything compiles together with my hub changes still in place:
+
+⏺ Bash(cd /Users/harryedwards/agentcraft/plugin && mvn -q clean package 2>&1 |
+      tail -25)
+  ⎿  (No output)
+  ⎿  (timeout 5m)
+
+⏺ Bash(cd /Users/harryedwards/agentcraft && mvn -f plugin/pom.xml clean package
+      2>&1 | tail -30)
+  ⎿  [INFO] skip non existing resourceDirectory /Users/harryedwards/agentcr
+     aft/plugin/src/test/resources
+     [INFO]
+     … +27 lines (ctrl+o to expand)
+
+⏺ Bash(cp /Users/harryedwards/agentcraft/plugin/target/agentcraft-0.1.0.jar
+      /Users/harryedwards/agentcraft/server/plugins/agentcraft.jar && ls -la
+      /Users/harryedwards/…)
+  ⎿  -rw-r--r--@ 1 harryedwards  staff  456961 26 May 17:56 /Users/harryedw
+     ards/agentcraft/server/plugins/agentcraft.jar
+
+⏺ All three islands enhanced and deployed. Build clean, JAR live in
+  server/plugins/agentcraft.jar.
+
+  Recap of what the three sub-agents built in parallel — each behind its
+  respective Xingye portal:
+
+  游戏门 GAME — Star Dust
+  - 6-platform floating gold parkour course (varied heights with end-rod "star
+  dust" tips)
+  - Star-key finish pedestal (gold plinth → amethyst crown → 5-block gold star →
+   4-rod halo)
+  - ~12 scattered gold "star-dust specks" across the grass
+  - Welcome sign: AgentCraft / GAME · 游戏门 / STAR DUST ☆ / Jump & collect
+
+  学习门 LEARNING — Growth Value
+  - Central Growth Tree (6-block cherry trunk + 7-wide rounded cherry/azalea
+  canopy + gold star apex + end-rod sparkles)
+  - 3 Knowledge Stations (chiseled bookshelf + lectern + reading sign — N/E/W
+  cardinals)
+  - 4-pillar amethyst "Growth Value" colonnade lining the south arrival path
+  - Constellation doubled from ~8 to ~16 end-rod stars
+  - Welcome sign: AgentCraft / LEARNING · 学习门 / GROWTH VALUE 🌱 / Read & 
+  wonder
+
+  任务门 TASK — Star Keys
+  - Star Key reward pedestal next to the agent pad (gold plinth + lightning-rod
+  key shaft + gold-block bow + 4-rod halo)
+  - 3 Daily/Weekly/Family Task Obelisks (polished-blackstone-brick spires with
+  gold caps + end-rod finials) along the east walkway, each with a Xingye-style
+  sign listing the reward (+5 Star Dust / +1 Star Key / +10 Growth)
+  - 3-chain hanging lantern row above the north quest board
+  - Welcome sign: AgentCraft / TASK · 任务门 / STAR KEYS 🗝 / Accept a quest
+
+  To see it in-game: ./agentcraft restart (or /reload confirm), then /hermes 
+  skyworld build. Walk through each portal — you should now arrive in a
+  destination island that visually announces its Xingye reward currency and
+  gives the child a clear "what do I do here" cue.
+
+✻ Sautéed for 1m 8s

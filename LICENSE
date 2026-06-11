@@ -1,0 +1,31 @@
+Omo — Proprietary Software License
+Copyright (c) 2026 Harry Edwards. All rights reserved.
+
+This software and its source code (the "Software"), including the client mod,
+the server plugin, the runtime, and the face service, are the confidential and
+proprietary property of Harry Edwards ("the Author"). The Software is made
+available for evaluation and authorized use only.
+
+Without the Author's prior written permission, you MAY NOT:
+  * copy, redistribute, sublicense, sell, or publish the Software or any part
+    of it;
+  * decompile, reverse-engineer, or attempt to extract source from any
+    distributed artifact, except to the extent this restriction is prohibited
+    by applicable law;
+  * remove or alter this notice;
+  * use the Software, or any token or credential it contains, to access the
+    Author's backend services except through an instance the Author operates
+    or has authorized.
+
+No license is granted to any patent, trademark, or trade secret of the Author.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION
+WITH THE SOFTWARE OR ITS USE.
+
+This Software is not affiliated with or endorsed by Mojang AB or Microsoft.
+Minecraft is a trademark of Mojang AB. Use of the Software requires a valid
+Minecraft account and is subject to the Minecraft End User License Agreement.

@@ -1,0 +1,71 @@
+# AgentCraft plugin configuration
+bridge:
+  url: "ws://127.0.0.1:8765"
+  token: "change-me-shared-secret"
+  reconnect_seconds: 5
+
+display:
+  # Block radius around an agent home that counts as "inside the room".
+  room_radius: 8
+  # How many lines of holographic screen text to keep above an agent.
+  # Each line is one armor-stand hologram; total board height ≈ screen_lines * 0.3 blocks.
+  screen_lines: 10
+
+chat:
+  # When a player types in chat, route to the closest agent within this radius.
+  # In-room agents are always preferred regardless of distance. Prefix a message
+  # with "!" to force a global broadcast instead.
+  routing_radius: 16
+
+cinema:
+  # URL the shared "standup" screen (cinema id "main") starts on. face/'s
+  # headless-cinema renders this and streams it to the in-game map-wall on the
+  # east of the plaza. Each coding workstation also has its own dev-site wall
+  # (cinema ids dev-1..dev-N, default localhost:3000..300N). Swap any of them at
+  # runtime with /omo cinema <url>  (main)  or  /omo cinema dev-2 <url>.
+  default_url: "http://localhost:3000"
+
+runtime:
+  # Where the runtime's HTTP bridge is reachable. The cinema poll loop and
+  # /omo cinema POST both hit this base. Must match runtime/src/server.ts
+  # AGENTCRAFT_HTTP_PORT (defaults to 8766).
+  http: "http://127.0.0.1:8766"
+
+build:
+  # /omo buildstudio seats a "mason" architect at a 32×32 plot. The mason's
+  # Claude brain streams build-DSL ops over the bridge; the plugin lays them
+  # down incrementally so a big build streams in instead of freezing the server.
+  # How many blocks to place per server tick while draining the queue. Higher =
+  # bigger builds finish faster and the build front (with the mason chasing it)
+  # moves quicker. 55 ≈ 1100 blocks/sec — a meaty castle in a few seconds.
+  blocks_per_tick: 55
+  # Play a quiet placement sound every ~10th block as the build streams in.
+  place_sound: true
+
+terminal:
+  # Stepping a glass-box plate spawns that station's PTY agent and opens its
+  # terminal. Each box runs a real login shell (cd/ls freely); `launch` is
+  # auto-run on open. Set launch to "shell", "none", or "off" for a plain shell.
+  #
+  # Coding workstations (code-1..N): each opens the real Claude Code CLI in its
+  # OWN PTY, so four coders never share one session. They share these defaults;
+  # cd anywhere once the shell is up.
+  code_launch: "claude"
+  # Default working dir for every coding workstation. Empty → $HOME/Fern if it
+  # exists, else $HOME. Change this for a new server-wide default.
+  code_cwd: ""
+  # Per-room working-dir overrides (room name → dir). Takes precedence over
+  # code_cwd/hermes_cwd for that one station — e.g. point code-1 and code-2 at
+  # different repos. Easiest to manage live, in-game:
+  #   /omo cwd <path>          set the server-wide default (code_cwd above)
+  #   /omo cwd <room> <path>   set one room's override (writes here)
+  #   /omo cwd <room> reset    clear a room's override
+  #   /omo cwd                 show the current default + overrides
+  # Applies the next time that station's terminal spawns fresh.
+  room_cwd: {}
+  # NOTE: the Studio's south Hermes worker is a chat-driven agent (task it in
+  # chat, right-click for its reasoning), NOT a PTY. These two only apply to the
+  # bare "hermes" PTY box (island reskin) + the no-arg terminal fallback, which
+  # open the Hermes CLI on entry (Ctrl+C drops to a shell; `hermes chat` re-enters).
+  hermes_launch: "hermes chat"
+  hermes_cwd: ""

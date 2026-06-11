@@ -1,0 +1,59 @@
+plugins {
+    id 'fabric-loom' version '1.16.2'
+    id 'java'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://www.jetbrains.com/intellij-repository/releases' }
+    maven { url = 'https://cache-redirector.jetbrains.com/intellij-dependencies' }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // Bundled (jar-in-jar) so the player only needs this one mod file.
+    // Pty4J pulls JNA + purejavacomm at runtime — declare both explicitly so
+    // `include` actually pulls them into the JIJ jar.
+    include(implementation("org.jetbrains.pty4j:pty4j:${project.pty4j_version}"))
+    include(implementation("net.java.dev.jna:jna:${project.jna_version}"))
+    include(implementation("net.java.dev.jna:jna-platform:${project.jna_version}"))
+    include(implementation("org.jetbrains.pty4j:purejavacomm:${project.purejavacomm_version}"))
+    // Pty4J 0.13 is partially Kotlin (Command.kt) — bundle the stdlib so the
+    // mod classloader can find kotlin.jvm.internal.Intrinsics at runtime.
+    include(implementation("org.jetbrains.kotlin:kotlin-stdlib:${project.kotlin_version}"))
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+    it.options.encoding = "UTF-8"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    withSourcesJar()
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.base.archivesName.get()}"}
+    }
+}

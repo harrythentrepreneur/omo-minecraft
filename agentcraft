@@ -1,0 +1,702 @@
+#!/usr/bin/env bash
+# AgentCraft single-command launcher.
+#
+#   ./agentcraft            start everything — AND reload anything you changed
+#   ./agentcraft restart    force a full clean restart of everything
+#   ./agentcraft stop       stop everything
+#   ./agentcraft status     show what's running
+#   ./agentcraft logs       tail runtime + mc logs
+#   ./agentcraft setup      one-shot setup (Paper + plugin build + npm install)
+#   ./agentcraft rebuild    rebuild and hot-swap the plugin JAR
+#
+# You almost never need anything but `./agentcraft`. Run it once to boot the
+# stack; run it again after editing code and it reloads ONLY what changed —
+# runtime TS → restarts runtime, plugin Java → rebuilds + restarts Paper,
+# face → restarts face. Use `./agentcraft restart` for a guaranteed fresh slate.
+#
+# The default `up` command:
+#   1. verifies prereqs (java, mvn, node, jq, curl)
+#   2. runs setup.sh once (idempotent — only first time)
+#   3. checks hermes-agent api_server is reachable on :8642
+#   4. starts (or reloads) the runtime, waits for it to bind :8765
+#   5. starts (or reloads) face + the Paper server
+#   6. tails all logs into this terminal
+#   7. Ctrl-C just detaches from the logs — the stack keeps running. Use
+#      `./agentcraft stop` to actually stop everything.
+#
+# Every service runs in its own process group (spawn_detached) so a Ctrl-C in
+# this terminal can't reach it — that's what makes "detach, keep running" work.
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOG_DIR="$ROOT/logs"
+PID_DIR="$ROOT/.pids"
+mkdir -p "$LOG_DIR" "$PID_DIR"
+
+# --- pretty output ---
+c_dim=$'\033[2m'; c_red=$'\033[31m'; c_grn=$'\033[32m'
+c_ylw=$'\033[33m'; c_blu=$'\033[34m'; c_rst=$'\033[0m'
+log()  { printf "%s[agentcraft]%s %s\n" "$c_blu" "$c_rst" "$*"; }
+warn() { printf "%s[agentcraft]%s %s\n" "$c_ylw" "$c_rst" "$*"; }
+err()  { printf "%s[agentcraft]%s %s\n" "$c_red" "$c_rst" "$*" >&2; }
+ok()   { printf "%s[agentcraft]%s %s%s%s\n" "$c_blu" "$c_rst" "$c_grn" "$*" "$c_rst"; }
+
+# --- helpers ---
+ensure_prereqs() {
+  local missing=()
+  for cmd in java mvn node npm curl jq; do
+    command -v "$cmd" >/dev/null 2>&1 || missing+=("$cmd")
+  done
+  if (( ${#missing[@]} > 0 )); then
+    err "missing prerequisites: ${missing[*]}"
+    err "  on macOS: brew install --cask temurin && brew install maven node jq"
+    exit 1
+  fi
+}
+
+ensure_setup() {
+  if [ ! -f "$ROOT/.agentcraft-setup-done" ] \
+     || [ ! -f "$ROOT/server/paper.jar" ] \
+     || [ ! -f "$ROOT/server/plugins/agentcraft.jar" ] \
+     || [ ! -d "$ROOT/runtime/node_modules" ]; then
+    log "running first-time setup…"
+    "$ROOT/scripts/setup.sh"
+    touch "$ROOT/.agentcraft-setup-done"
+  fi
+}
+
+# Rebuild plugin JAR if any Java source is newer than the deployed jar.
+# Catches the common dev case: you edit a builder, run ./agentcraft, expect it live.
+ensure_plugin_fresh() {
+  local jar="$ROOT/server/plugins/agentcraft.jar"
+  [ -f "$jar" ] || return 0  # ensure_setup will build it
+  local newer
+  newer=$(find "$ROOT/plugin/src" "$ROOT/plugin/pom.xml" -newer "$jar" -type f 2>/dev/null | head -1)
+  if [ -n "$newer" ]; then
+    log "plugin sources changed since last build — rebuilding…"
+    "$ROOT/scripts/build-plugin.sh" > "$LOG_DIR/build-plugin.log" 2>&1 || {
+      err "plugin rebuild failed — see logs/build-plugin.log"
+      tail -20 "$LOG_DIR/build-plugin.log" >&2
+      exit 1
+    }
+    ok "✓ plugin rebuilt"
+  fi
+}
+
+ensure_face_setup() {
+  # The face/ subtree (the Omo hologram on :8080) ships in this repo but its
+  # node_modules and .env are user-local. Install deps on first boot; copy
+  # .env.example so the user has a placeholder to drop GEMINI_API_KEY into.
+  if [ ! -d "$ROOT/face/node_modules" ]; then
+    log "installing face dependencies (one-time)…"
+    (cd "$ROOT/face" && npm install --silent) || warn "face npm install failed — voice may not work"
+  fi
+  if [ ! -f "$ROOT/face/.env" ] && [ -f "$ROOT/face/.env.example" ]; then
+    cp "$ROOT/face/.env.example" "$ROOT/face/.env"
+    warn "created face/.env from .env.example — add your GEMINI_API_KEY there"
+  fi
+
+  # Build the WindowCapture Swift binary if it's missing or the source is newer.
+  local wc_bin="$ROOT/face/capture/WindowCapture"
+  local wc_src="$ROOT/face/capture/WindowCapture.swift"
+  if [ -f "$wc_src" ] && command -v swiftc >/dev/null 2>&1; then
+    if [ ! -f "$wc_bin" ] || [ "$wc_src" -nt "$wc_bin" ]; then
+      log "building WindowCapture binary (ScreenCaptureKit)…"
+      bash "$ROOT/face/capture/build.sh" > /dev/null 2>&1 \
+        && ok "✓ WindowCapture built" \
+        || warn "WindowCapture build failed — /omo capture will be unavailable (needs Xcode)"
+    fi
+  fi
+}
+
+hermes_reachable() {
+  curl -s --max-time 2 http://127.0.0.1:8642/health > /dev/null 2>&1
+}
+
+check_hermes_agent() {
+  if hermes_reachable; then
+    ok "✓ hermes-agent reachable on :8642"
+    return 0
+  fi
+  return 1
+}
+
+ensure_hermes_env() {
+  # Make sure ~/.hermes/.env has the two flags that let the api_server platform
+  # open :8642 and accept localhost requests from AgentCraft. Idempotent.
+  local env_file="$HOME/.hermes/.env"
+  mkdir -p "$(dirname "$env_file")"
+  [ -f "$env_file" ] || touch "$env_file"
+  if ! grep -qE '^API_SERVER_ENABLED=true' "$env_file"; then
+    echo "API_SERVER_ENABLED=true" >> "$env_file"
+    log "added API_SERVER_ENABLED=true to $env_file"
+  fi
+  if ! grep -qE '^GATEWAY_ALLOW_ALL_USERS=true' "$env_file"; then
+    echo "GATEWAY_ALLOW_ALL_USERS=true" >> "$env_file"
+    log "added GATEWAY_ALLOW_ALL_USERS=true to $env_file"
+  fi
+  # Newer hermes-agent refuses to start the api_server without API_SERVER_KEY,
+  # even on a loopback-only bind. Provision one and keep runtime/.env in sync so
+  # the Bearer token the runtime sends matches what the gateway expects.
+  local runtime_env="$ROOT/runtime/.env"
+  local key
+  key="$(grep -E '^API_SERVER_KEY=' "$env_file" | head -1 | cut -d= -f2-)"
+  if [ -z "$key" ]; then
+    # Reuse a key the runtime may already have, else mint a fresh one.
+    key="$(grep -E '^HERMES_API_SERVER_KEY=' "$runtime_env" 2>/dev/null | head -1 | cut -d= -f2-)"
+    [ -z "$key" ] && key="agentcraft-$(openssl rand -hex 16)"
+    echo "API_SERVER_KEY=$key" >> "$env_file"
+    log "added API_SERVER_KEY to $env_file"
+  fi
+  # Mirror the key into runtime/.env (add or replace) so the two stay matched.
+  if [ -f "$runtime_env" ]; then
+    if grep -qE '^HERMES_API_SERVER_KEY=' "$runtime_env"; then
+      if ! grep -qxF "HERMES_API_SERVER_KEY=$key" "$runtime_env"; then
+        # Replace the existing line in place (BSD/GNU sed compatible via temp file).
+        grep -vE '^HERMES_API_SERVER_KEY=' "$runtime_env" > "$runtime_env.tmp"
+        echo "HERMES_API_SERVER_KEY=$key" >> "$runtime_env.tmp"
+        mv "$runtime_env.tmp" "$runtime_env"
+        log "synced HERMES_API_SERVER_KEY in runtime/.env to match the gateway"
+      fi
+    else
+      echo "HERMES_API_SERVER_KEY=$key" >> "$runtime_env"
+      log "added HERMES_API_SERVER_KEY to runtime/.env"
+    fi
+  fi
+}
+
+start_hermes() {
+  if hermes_reachable; then
+    ok "✓ hermes-agent already running on :8642"
+    return 0
+  fi
+  if ! command -v hermes >/dev/null 2>&1; then
+    warn "hermes binary not found on PATH."
+    warn "  install: curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash"
+    warn "  skipping — agents will fail until you start hermes-agent yourself."
+    return 1
+  fi
+  ensure_hermes_env
+  log "starting hermes-agent gateway → logs/hermes.log"
+  spawn_detached "$LOG_DIR/hermes.log" "exec hermes gateway"
+  echo "$SPAWNED_PID" > "$PID_DIR/hermes.pid"
+
+  # Wait up to 30s for :8642 to respond. hermes' first boot can be slow
+  # (loads skills, models, etc.).
+  for _ in $(seq 1 60); do
+    if hermes_reachable; then
+      ok "✓ hermes-agent listening on :8642"
+      return 0
+    fi
+    sleep 0.5
+  done
+  warn "hermes-agent didn't open :8642 in 30s."
+  warn "  most common cause: api_server platform isn't enabled."
+  warn "  fix in one command:"
+  warn ""
+  warn "    echo 'API_SERVER_ENABLED=true' >> ~/.hermes/.env"
+  warn "    echo 'GATEWAY_ALLOW_ALL_USERS=true' >> ~/.hermes/.env  # if not set"
+  warn "    ./agentcraft restart-hermes"
+  warn ""
+  return 1
+}
+
+is_running() {
+  local pidfile="$1"
+  [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile")" 2>/dev/null
+}
+
+stop_pidfile() {
+  local name="$1"
+  local pidfile="$PID_DIR/$name.pid"
+  if is_running "$pidfile"; then
+    local pid; pid=$(cat "$pidfile")
+    log "stopping $name (pid $pid)"
+    # Services run as their own process-group leader (see spawn_detached), so a
+    # negative pid kills the whole group — npm, tsx, java, node and all. The
+    # pkill -P + kill "$pid" lines also cover any old-style (non-leader) pidfile.
+    kill -TERM -"$pid" 2>/dev/null || true
+    pkill -TERM -P "$pid" 2>/dev/null || true
+    kill -TERM "$pid" 2>/dev/null || true
+    # give it 5s to exit cleanly, then SIGKILL
+    for _ in 1 2 3 4 5; do
+      kill -0 "$pid" 2>/dev/null || break
+      sleep 1
+    done
+    if kill -0 "$pid" 2>/dev/null; then
+      kill -KILL -"$pid" 2>/dev/null || true
+      pkill -KILL -P "$pid" 2>/dev/null || true
+      kill -KILL "$pid" 2>/dev/null || true
+    fi
+  fi
+  rm -f "$pidfile"
+}
+
+# Reap orphaned headless Chrome. Puppeteer's Chrome children can re-parent away
+# from face when it's killed, survive, and squat their profile's SingletonLock —
+# which blanks the next cinema/overlay launch. Match ONLY our .agentcraft profile
+# dirs (via --user-data-dir) so the user's normal Chrome is never touched.
+reap_headless_chrome() {
+  pkill -f "\.agentcraft/headless-chrome" 2>/dev/null || true
+}
+
+# Start a long-running service in its OWN process group, detached from this
+# launcher's controlling terminal, with output to <logfile> (truncated). The
+# separate process group is what lets Ctrl-C here just detach from the logs
+# WITHOUT killing the service — node and java otherwise die on the terminal's
+# SIGINT even when backgrounded. Sets SPAWNED_PID to the new pid (the group
+# leader). Falls back to a plain background job if perl is somehow missing.
+spawn_detached() {  # usage: spawn_detached <logfile> "<bash command string>"
+  local logfile="$1" cmd="$2"
+  if command -v perl >/dev/null 2>&1; then
+    perl -e 'setpgrp(0,0); open(STDOUT,">",$ARGV[0]) or die "log: $!"; open(STDERR,">&",STDOUT) or die; exec("/bin/bash","-c",$ARGV[1]) or die "exec: $!"' \
+      "$logfile" "$cmd" &
+    SPAWNED_PID=$!
+  else
+    ( exec /bin/bash -c "$cmd" ) > "$logfile" 2>&1 &
+    SPAWNED_PID=$!
+  fi
+}
+
+start_runtime() {
+  if is_running "$PID_DIR/runtime.pid"; then
+    log "runtime already running"
+    return
+  fi
+  if [ ! -f "$ROOT/runtime/.env" ]; then
+    err "runtime/.env missing — running setup again"
+    "$ROOT/scripts/setup.sh"
+  fi
+  # Run under tsx watch so saving any runtime source reloads it in ~1s while
+  # you stay in-game — the plugin reconnects to the new process on its own
+  # (BridgeClient auto-reconnect). This is the "small changes go live" path.
+  log "starting runtime (watch — reloads on save) → logs/runtime.log"
+  spawn_detached "$LOG_DIR/runtime.log" "cd '$ROOT/runtime' && exec npm run dev"
+  echo "$SPAWNED_PID" > "$PID_DIR/runtime.pid"
+
+  # wait up to 15s for the WS bridge to bind :8765
+  for _ in $(seq 1 30); do
+    if grep -q "listening on ws://" "$LOG_DIR/runtime.log" 2>/dev/null; then
+      ok "✓ runtime listening on :8765"
+      return 0
+    fi
+    sleep 0.5
+  done
+  warn "runtime didn't report 'listening' in 15s — check logs/runtime.log"
+}
+
+# The net-new ADK + Gemini crew (omo-agent/) served by `adk api_server` on :8000.
+# This is the Mission Control brain the AdkAgent villagers talk to. Runs in its
+# own process group so it survives Ctrl-C / terminal changes like every other
+# service — the fix for the brain dying mid-session.
+start_adk() {
+  if is_running "$PID_DIR/adk.pid"; then
+    log "adk (Gemini crew) already running"
+    return
+  fi
+  if [ ! -x "$ROOT/omo-agent/.venv/bin/adk" ]; then
+    warn "omo-agent/.venv missing — ADK crew won't start (python3 -m venv omo-agent/.venv && omo-agent/.venv/bin/pip install google-adk)"
+    return 1
+  fi
+  # Free :8000 if a stale adk (not tracked by our pidfile) is squatting on it.
+  squatter=$(lsof -nP -tiTCP:8000 -sTCP:LISTEN 2>/dev/null || true)
+  if [ -n "$squatter" ]; then
+    warn "freeing :8000 (stale adk $squatter)"
+    kill $squatter 2>/dev/null || true; sleep 1
+    squatter=$(lsof -nP -tiTCP:8000 -sTCP:LISTEN 2>/dev/null || true)
+    [ -n "$squatter" ] && kill -9 $squatter 2>/dev/null || true
+  fi
+  log "starting ADK Gemini crew (api_server :8000) → logs/adk.log"
+  spawn_detached "$LOG_DIR/adk.log" "cd '$ROOT/omo-agent' && exec .venv/bin/adk api_server --port 8000"
+  echo "$SPAWNED_PID" > "$PID_DIR/adk.pid"
+  for _ in $(seq 1 40); do
+    if [ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/list-apps 2>/dev/null)" = "200" ]; then
+      ok "✓ ADK crew serving on :8000 (apps: omo, specialist)"
+      return 0
+    fi
+    sleep 0.5
+  done
+  warn "ADK crew didn't report ready in 20s — check logs/adk.log"
+}
+
+start_face() {
+  if is_running "$PID_DIR/face.pid"; then
+    log "face already running"
+    return
+  fi
+  if [ ! -d "$ROOT/face/node_modules" ]; then
+    warn "face/node_modules missing — run './agentcraft setup' first"
+    return 1
+  fi
+  # Free :8080 if a stale face (not tracked by our pidfile) is squatting on it.
+  # Otherwise the new face dies with EADDRINUSE and the cinema + voice go dark.
+  squatter=$(lsof -nP -tiTCP:8080 -sTCP:LISTEN 2>/dev/null || true)
+  if [ -n "$squatter" ]; then
+    warn "freeing :8080 (stale process $squatter)"
+    kill $squatter 2>/dev/null || true
+    sleep 1
+    squatter=$(lsof -nP -tiTCP:8080 -sTCP:LISTEN 2>/dev/null || true)
+    [ -n "$squatter" ] && kill -9 $squatter 2>/dev/null || true
+  fi
+  log "starting face → logs/face.log (http://127.0.0.1:8080)"
+  spawn_detached "$LOG_DIR/face.log" "cd '$ROOT/face' && exec npm start --silent"
+  echo "$SPAWNED_PID" > "$PID_DIR/face.pid"
+
+  # Wait up to 10s for the face to bind :8080. We grep loosely so ANSI
+  # colour codes in face.log don't break the match.
+  for _ in $(seq 1 20); do
+    if grep -q "listening on .*:8080" "$LOG_DIR/face.log" 2>/dev/null; then
+      ok "✓ face listening on :8080"
+      return 0
+    fi
+    sleep 0.5
+  done
+  warn "face didn't report 'listening' in 10s — check logs/face.log"
+}
+
+start_mc() {
+  if is_running "$PID_DIR/mc.pid"; then
+    log "mc server already running"
+    return
+  fi
+  if [ ! -f "$ROOT/server/paper.jar" ]; then
+    err "server/paper.jar missing — run './agentcraft setup' first"
+    exit 1
+  fi
+  log "starting minecraft server → logs/mc.log"
+  local mem="${AGENTCRAFT_MC_MEM:-2G}"
+  spawn_detached "$LOG_DIR/mc.log" "cd '$ROOT/server' && exec java -Xms$mem -Xmx$mem -jar paper.jar --nogui"
+  echo "$SPAWNED_PID" > "$PID_DIR/mc.pid"
+
+  # wait up to 60s for Paper to print "Done"
+  for _ in $(seq 1 120); do
+    if grep -q 'Done.*For help, type "help"' "$LOG_DIR/mc.log" 2>/dev/null; then
+      ok "✓ paper server ready on :25565"
+      return 0
+    fi
+    sleep 0.5
+  done
+  warn "mc server didn't finish booting in 60s — check logs/mc.log"
+}
+
+stop_all() {
+  stop_pidfile mc
+  stop_pidfile face
+  reap_headless_chrome
+  stop_pidfile adk
+  stop_pidfile runtime
+  stop_pidfile hermes
+}
+
+# Ctrl-C handler for the foreground log tail. Because every service runs in its
+# own process group (spawn_detached), Ctrl-C only reaches this launcher + the
+# tail — the stack keeps running. So we just stop tailing and hand back the
+# prompt, instead of tearing everything down.
+detach() {
+  echo
+  log "detached from logs — everything is still running."
+  log "  • re-run ./agentcraft  to apply any change (or just to watch logs again)"
+  log "  • ./agentcraft stop    to actually stop everything"
+  exit 0
+}
+
+# --- reload model --------------------------------------------------------
+# Small changes reload live; only big changes need ./agentcraft:
+#   • runtime (prompts, tools, rooms, agent behaviour) runs under tsx watch,
+#     so saving a file reloads it in ~1s — you never leave the game.
+#   • face is restarted by ./agentcraft when its source changed.
+#   • the plugin (Java) is the "big thing": ./agentcraft rebuilds it and
+#     restarts Paper (the only change that briefly drops you from the server).
+# A pidfile's mtime is when that service last started, so "any source newer
+# than the pidfile" == "changed since last start".
+src_changed_since() {
+  local pidfile="$1"; shift
+  [ -f "$pidfile" ] || return 1
+  [ -n "$(find "$@" -newer "$pidfile" -type f 2>/dev/null | head -1)" ]
+}
+
+maybe_restart_face() {
+  if is_running "$PID_DIR/face.pid"; then
+    if src_changed_since "$PID_DIR/face.pid" "$ROOT/face/src" "$ROOT/face/server.js"; then
+      log "face code changed — reloading"
+      stop_pidfile face
+      reap_headless_chrome
+      start_face
+    else
+      ok "✓ face already running (no code changes)"
+    fi
+  else
+    start_face
+  fi
+}
+
+maybe_restart_mc() {
+  if is_running "$PID_DIR/mc.pid"; then
+    # ensure_plugin_fresh already rebuilt the JAR if plugin sources changed.
+    # If the JAR is newer than the running server, restart to load it.
+    if [ "$ROOT/server/plugins/agentcraft.jar" -nt "$PID_DIR/mc.pid" ]; then
+      log "plugin JAR rebuilt — restarting Paper to load it"
+      stop_pidfile mc
+      start_mc
+    else
+      ok "✓ mc already running (plugin unchanged)"
+    fi
+  else
+    start_mc
+  fi
+}
+
+# The full boot/reload sequence. Used by both `up` and `restart`.
+do_up() {
+  ensure_prereqs
+  ensure_setup
+  ensure_plugin_fresh
+  ensure_face_setup
+  start_hermes || true
+  start_runtime              # tsx watch — reloads itself on save, no restart needed
+  start_adk || true          # Gemini ADK crew (api_server :8000) — Mission Control brain
+  maybe_restart_face || true
+  # The face server auto-launches a headless Chrome internally that loads
+  # /overlay so the in-game Omo HUD always has frames flowing — no
+  # browser window to keep open, no manual step. Opt out via
+  # OMO_HEADLESS_OVERLAY=false in face/.env.
+  maybe_restart_mc
+  echo
+  paper_ver="$(cat "$ROOT/server/.paper-version" 2>/dev/null || echo "?")"
+  ok "==================================================="
+  ok "  AgentCraft is up."
+  ok "  Omo face:  http://localhost:8080  (talk to her here)"
+  ok "  In Minecraft (Java $paper_ver): connect to localhost"
+  ok "  Then: /gamemode creative"
+  ok "        /omo skyworld         # build the islands"
+  ok "        say 'take me to the code lab' to Omo's face"
+  ok "  Changed anything? Just re-run ./agentcraft — it reloads whatever changed."
+  ok "  (No need to know what kind of change. Runtime tweaks are live on save.)"
+  ok "  Ctrl-C here detaches from the logs — the stack keeps running."
+  ok "  ./agentcraft restart = full clean slate · ./agentcraft stop = stop it all."
+  ok "==================================================="
+  echo
+  trap detach INT TERM
+  # Tail all logs with file headers as labels.
+  tail -F -n 0 "$LOG_DIR/hermes.log" "$LOG_DIR/runtime.log" "$LOG_DIR/adk.log" "$LOG_DIR/face.log" "$LOG_DIR/mc.log" 2>/dev/null
+}
+
+# --- subcommands ---
+CMD="${1:-up}"
+[ $# -gt 0 ] && shift || true
+
+case "$CMD" in
+  setup)
+    ensure_prereqs
+    "$ROOT/scripts/setup.sh"
+    touch "$ROOT/.agentcraft-setup-done"
+    ;;
+
+  up|start|"")
+    do_up
+    ;;
+
+  restart|refresh|reload)
+    # One command for "give me a fresh slate." Stop everything, then do_up
+    # starts it all back from scratch (nothing is running, so every service
+    # boots clean regardless of mtimes).
+    log "full restart — stopping everything, then starting fresh"
+    stop_all
+    do_up
+    ;;
+
+  stop|down)
+    stop_all
+    ok "stopped."
+    ;;
+
+  status)
+    if is_running "$PID_DIR/hermes.pid"; then
+      ok "✓ hermes  (pid $(cat "$PID_DIR/hermes.pid"))"
+    elif hermes_reachable; then
+      ok "✓ hermes  (external — :8642 responding)"
+    else
+      warn "✗ hermes"
+    fi
+    if is_running "$PID_DIR/runtime.pid"; then
+      ok "✓ runtime (pid $(cat "$PID_DIR/runtime.pid"))"
+    else
+      warn "✗ runtime"
+    fi
+    if is_running "$PID_DIR/adk.pid"; then
+      ok "✓ adk     (pid $(cat "$PID_DIR/adk.pid")) — Gemini crew on :8000"
+    elif [ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/list-apps 2>/dev/null)" = "200" ]; then
+      ok "✓ adk     (external — :8000 responding)"
+    else
+      warn "✗ adk"
+    fi
+    if is_running "$PID_DIR/face.pid"; then
+      ok "✓ face    (pid $(cat "$PID_DIR/face.pid")) — http://127.0.0.1:8080"
+    else
+      warn "✗ face"
+    fi
+    if is_running "$PID_DIR/mc.pid"; then
+      ok "✓ mc      (pid $(cat "$PID_DIR/mc.pid"))"
+    else
+      warn "✗ mc"
+    fi
+    ;;
+
+  restart-face|refresh-face|reload-face)
+    stop_pidfile face
+    ensure_face_setup
+    start_face
+    ;;
+
+  restart-adk|refresh-adk|reload-adk)
+    stop_pidfile adk
+    start_adk
+    ;;
+
+  hermes)
+    # Standalone: just start hermes-agent's gateway (foreground tail).
+    start_hermes || true
+    trap 'stop_pidfile hermes; exit 0' INT TERM
+    log "tailing logs/hermes.log (Ctrl-C to stop hermes-agent)"
+    tail -F -n 0 "$LOG_DIR/hermes.log"
+    ;;
+
+  restart-runtime|refresh-runtime|reload-runtime)
+    stop_pidfile runtime
+    start_runtime
+    ;;
+
+  restart-hermes|refresh-hermes|reload-hermes)
+    stop_pidfile hermes
+    start_hermes
+    ;;
+
+  logs)
+    tail -F "$LOG_DIR/runtime.log" "$LOG_DIR/face.log" "$LOG_DIR/mc.log" "$LOG_DIR/hermes.log"
+    ;;
+
+  watch)
+    # Open a new Terminal window (macOS) tailing one agent's live event log.
+    # Usage:  ./agentcraft watch alice
+    #         ./agentcraft watch           # lists active agents
+    AGENTS_DIR="$LOG_DIR/agents"
+    if [ $# -eq 0 ]; then
+      if [ ! -d "$AGENTS_DIR" ] || [ -z "$(ls -A "$AGENTS_DIR" 2>/dev/null)" ]; then
+        warn "no agents logged yet — spawn one in-game first (/omo spawn …)"
+        exit 0
+      fi
+      log "active agent logs in $AGENTS_DIR:"
+      for f in "$AGENTS_DIR"/*.log; do
+        echo "  $(basename "$f" .log)"
+      done
+      echo
+      log "usage: ./agentcraft watch <id>   (opens a new Terminal window)"
+      exit 0
+    fi
+    AGENT="$1"
+    AGENT_LOG="$AGENTS_DIR/$AGENT.log"
+    mkdir -p "$AGENTS_DIR"
+    touch "$AGENT_LOG"
+    if command -v osascript >/dev/null 2>&1; then
+      ok "opening Terminal window for agent '$AGENT'"
+      osascript <<EOF >/dev/null
+tell application "Terminal"
+  activate
+  do script "clear; printf '\\033[1m── AgentCraft :: watching $AGENT ──\\033[0m\\n'; tail -F '$AGENT_LOG'"
+end tell
+EOF
+    else
+      log "tailing $AGENT_LOG (Ctrl-C to stop)"
+      exec tail -F "$AGENT_LOG"
+    fi
+    ;;
+
+  rebuild)
+    "$ROOT/scripts/build-plugin.sh"
+    ok "plugin rebuilt → server/plugins/agentcraft.jar"
+    if is_running "$PID_DIR/mc.pid"; then
+      log "mc is running — hot-swapping by restarting the Paper server…"
+      stop_pidfile mc
+      start_mc
+      ok "✓ paper restarted with new plugin JAR"
+    fi
+    ;;
+
+  build-mod)
+    # Build the client-side Fabric mod that ships the in-game terminal.
+    # Java 21 lives at client-mod/.jdk so the build doesn't fight whatever JDK
+    # the user has system-wide (the rest of the project happily uses 26).
+    MOD_DIR="$ROOT/client-mod"
+    JDK_DIR="$MOD_DIR/.jdk"
+    if [ ! -d "$JDK_DIR" ] || [ -z "$(ls -A "$JDK_DIR" 2>/dev/null)" ]; then
+      log "downloading Temurin 21 to client-mod/.jdk (one-time, ~200MB)…"
+      mkdir -p "$JDK_DIR"
+      curl -fsSL -o "$JDK_DIR/jdk21.tar.gz" \
+        "https://api.adoptium.net/v3/binary/latest/21/ga/mac/aarch64/jdk/hotspot/normal/eclipse"
+      tar -xzf "$JDK_DIR/jdk21.tar.gz" -C "$JDK_DIR"
+      rm "$JDK_DIR/jdk21.tar.gz"
+    fi
+    JDK_HOME="$(ls -d "$JDK_DIR"/jdk-21* 2>/dev/null | head -1)/Contents/Home"
+    if [ ! -x "$JDK_HOME/bin/java" ]; then
+      err "couldn't find java 21 under $JDK_DIR"
+      exit 1
+    fi
+    log "building Fabric mod with $JDK_HOME"
+    ( cd "$MOD_DIR" && JAVA_HOME="$JDK_HOME" PATH="$JDK_HOME/bin:$PATH" ./gradlew --no-daemon build ) || {
+      err "mod build failed"
+      exit 1
+    }
+    BUILT=$(ls "$MOD_DIR/build/libs/"*.jar 2>/dev/null | grep -v sources | head -1)
+    ok "✓ mod built → $BUILT"
+    cat <<EOF
+
+next steps (one-time install on the client):
+
+  1. install fabric loader for minecraft 1.21.11 — run the installer from
+     https://fabricmc.net/use/installer/ and pick the 1.21.11 vanilla profile.
+
+  2. drop both jars into your minecraft mods folder:
+       $BUILT
+       fabric-api-0.141.4+1.21.11.jar  (download from https://modrinth.com/mod/fabric-api)
+
+     on macOS that folder is:
+       ~/Library/Application Support/minecraft/mods/
+
+  3. in the minecraft launcher pick the "fabric-loader-1.21.11" profile and launch.
+
+  4. join the AgentCraft server, then press backtick (\`) anywhere in-game.
+
+EOF
+    ;;
+
+  *)
+    cat <<EOF
+usage: ./agentcraft [command]
+
+You almost never need more than the first two:
+
+  (no command)      start everything — and the ONE command to run after any
+                    change. It reloads whatever changed; you never have to know
+                    whether it was "small" or "big". (Runtime tweaks are usually
+                    already live on save, so this is often just a no-op + logs.)
+  restart           force a full clean restart of everything
+
+Everything else (rarely needed):
+  stop              stop everything (hermes, runtime, face, mc)
+  status            show what's running
+  logs              tail all four logs
+  hermes            start ONLY hermes-agent (foreground), tail its log
+  watch [id]        open a Terminal window tailing one agent's live feed
+                    (no id → list active agents)
+  setup             one-shot setup (Paper + plugin build + npm install)
+  rebuild           rebuild the plugin JAR and hot-swap it into a running server
+  build-mod         build the client-side Fabric mod (in-game terminal)
+
+Targeted restarts (the plain './agentcraft' covers these automatically):
+  restart-runtime   restart only the Node runtime (HTTP + WS)
+  restart-hermes    restart just hermes-agent
+  restart-face      restart just the omo face hologram on :8080
+EOF
+    ;;
+esac

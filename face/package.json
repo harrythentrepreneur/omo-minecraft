@@ -1,0 +1,20 @@
+{
+  "name": "omo-mc-face",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Slim hologram + voice surface for omo-mc. Routes tool calls (teleport, etc.) to the omo-mc runtime, which forwards them into the Minecraft world.",
+  "scripts": {
+    "start": "node server.js",
+    "bake-static-face": "node scripts/bake-static-face.js"
+  },
+  "dependencies": {
+    "@google/genai": "^1.50.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "puppeteer-core": "^23.10.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "agentcraft-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Hermes agent runtime that bridges to the AgentCraft Minecraft plugin over WebSocket.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "start:plain": "tsx src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "postinstall": "node -e \"const fs=require('fs');const p=require('path');for(const d of ['darwin-arm64','darwin-x64','linux-x64','linux-arm64']){const f=p.join('node_modules/node-pty/prebuilds',d,'spawn-helper');if(fs.existsSync(f))fs.chmodSync(f,0o755);}\""
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.150",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@types/express": "^5.0.6",
+    "dotenv": "^16.4.5",
+    "express": "^5.2.1",
+    "googleapis": "^144.0.0",
+    "node-pty": "^1.1.0",
+    "openai": "^6.39.0",
+    "stripe": "^17.5.0",
+    "ws": "^8.18.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

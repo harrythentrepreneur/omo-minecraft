@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.agentcraft.terminal.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "BookEditScreenMixin",
+    "BookScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

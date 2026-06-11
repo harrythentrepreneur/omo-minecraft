@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Omo Overlay</title>
+<style>
+  /* This page exists for one job: render a tight 160×160 transparent
+     close-up of Omo's head, composite a holoscope chrome (radial glow +
+     circular mask + thin cyan ring), capture each frame as PNG every
+     ~80ms, POST it to the runtime, and let the in-game HUD pull it.
+     There is no UI to look at — leave the tab open in the background.
+
+     Transparent body so the canvas alpha is preserved end-to-end:
+       - body bg: transparent
+       - canvas bg: transparent
+       - renderer.setClearAlpha(0) in JS
+       - the 2D compositor canvas (in JS) is what actually gets POSTed,
+         with the mask + ring + glow already baked into its alpha.
+
+     ?debug=1 turns on a checker bg + a status pill so framing is
+     visually verifiable. In production, the page is pure black with no
+     status chrome — opening it in a normal tab looks empty. */
+  html, body {
+    margin: 0; padding: 0; width: 100vw; height: 100vh;
+    background: transparent;
+    color: #9fb4d6;
+    font: 11px/1.4 ui-monospace, "SF Mono", Menlo, monospace;
+    overflow: hidden;
+  }
+  body.debug {
+    background:
+      repeating-conic-gradient(#101418 0% 25%, #1a2028 0% 50%) 50% / 28px 28px;
+  }
+  /* The visible WebGL canvas — also the source the JS compositor reads
+     from. Size in CSS matches the bitmap size (set in JS) so there's no
+     stretch. Centered in the viewport for debug inspection. */
+  #cap {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 256px; height: 256px;
+    background: transparent;
+    display: block;
+  }
+  /* Pill is hidden by default; JS reveals it only when ?debug=1 is set. */
+  #pill {
+    position: fixed; left: 10px; bottom: 10px;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 5px 9px; border-radius: 999px;
+    letter-spacing: 0.06em;
+    display: none;
+  }
+  #pill.bad { color: #ff8aa0; }
+  #pill.good { color: #8ee7ff; }
+</style>
+<!-- Same import map as index.html — avatar.js does `import * as THREE from
+     'three'` and only resolves with this map present. Pinned to the same
+     0.160.0 build the main page uses. -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+  <canvas id="cap" width="256" height="256"></canvas>
+  <div id="pill">booting…</div>
+  <script type="module" src="/overlay-app.js?v=12"></script>
+</body>
+</html>

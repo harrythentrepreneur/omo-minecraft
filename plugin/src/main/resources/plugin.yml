@@ -1,0 +1,28 @@
+name: AgentCraft
+version: ${project.version}
+main: com.agentcraft.AgentCraftPlugin
+api-version: "1.21"
+authors: [harryedwards]
+description: Spawn and interact with Hermes AI agents inside Minecraft.
+commands:
+  omo:
+    description: Omo control command.
+    aliases: [hermes]
+    usage: |
+      /omo island                              - build the beach-island world (same 4 features, re-skinned)
+      /omo village build [homes]               - generate an agent village around you
+      /omo spawn <id> <role...>                - spawn a Hermes agent at your position
+      /omo spawn-code <id> <cwd> <task...>     - spawn a Claude Code villager (workshop room)
+      /omo despawn <id>                        - remove an agent
+      /omo list                                - list active agents
+      /omo room define <name>                  - mark your current chunk as a named room
+      /omo room here                           - print the room you are standing in
+      /omo say <id> <text...>                  - talk to an agent
+      /omo approve <callId>                    - approve a pending sensitive action
+      /omo deny <callId>                       - deny a pending sensitive action
+      /omo reconnect                           - reconnect to the runtime
+    permission: agentcraft.use
+permissions:
+  agentcraft.use:
+    description: Use AgentCraft commands.
+    default: op

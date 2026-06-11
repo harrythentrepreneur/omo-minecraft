@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Omo Mission Control — A world that builds itself</title>
+<meta name="description" content="Say one sentence and watch a whole AI company build itself — block by block. Omo turns your autonomous AI org into a place you walk through. Powered by Gemini, ADK and MCP." />
+<meta name="author" content="Omo" />
+<meta name="robots" content="index,follow" />
+<meta name="theme-color" content="#1E1E22" />
+<meta name="color-scheme" content="dark" />
+<!-- TODO on deploy: set this to your live URL -->
+<link rel="canonical" href="https://omo.computer/" />
+
+<!-- Social share cards. NOTE: og:image/og:url must be ABSOLUTE for previews to render.
+     After deploy, swap https://omo.computer with your real domain. -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Omo Mission Control" />
+<meta property="og:title" content="Say one sentence. Watch a whole AI company build itself." />
+<meta property="og:description" content="Omo turns your autonomous AI org into a place you walk through — drop an HQ, speak a goal, watch the world build itself. Gemini · ADK · MCP." />
+<meta property="og:url" content="https://omo.computer/" />
+<meta property="og:image" content="https://omo.computer/images/hero.jpg" />
+<meta property="og:image:width" content="1500" />
+<meta property="og:image:height" content="844" />
+<meta property="og:image:alt" content="A glowing circular alien HQ dropped on a vanilla Minecraft hillside at sunset." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Say one sentence. Watch a whole AI company build itself." />
+<meta name="twitter:description" content="Your autonomous AI org as a place you walk through. Drop an HQ, speak a goal, watch the world build itself — live. Gemini · ADK · MCP." />
+<meta name="twitter:image" content="https://omo.computer/images/hero.jpg" />
+
+<!-- pixel grass-block favicon -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%236BBF3B'/%3E%3Crect width='16' height='5' fill='%238FE05A'/%3E%3Crect x='5' y='6' width='6' height='6' fill='%2346E3D8'/%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+<style>
+  /* ───────────────────────── Minecraft design system ───────────────────────── */
+  :root{
+    --sky-top:#5B93FF; --sky-mid:#79A6FF; --sky-low:#BFE0FF;
+    --grass:#6BBF3B; --grass-top:#8FE05A; --dirt:#7A5132; --dirt-dk:#5A3A22;
+    --stone:#9A9A9A; --stone-lt:#C6C6C6; --stone-dk:#5A5A5A;
+    --panel:#1E1E22; --panel-lt:#2C2C32; --panel-edge:#0C0C0E;
+    --ink:#F4F4F4; --ink-dim:#B9C0C8; --shadow:#2A2A2A;
+    --diamond:#46E3D8; --diamond-dk:#1FA6B4;
+    --emerald:#43C463; --emerald-dk:#2C8C44;
+    --gold:#FFD13B; --gold-dk:#C99A00;
+    --redstone:#E5413B;
+    --miss-a:#000000; --miss-b:#F800F8;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--panel); color:var(--ink);
+    font-family:'VT323',monospace; font-size:23px; line-height:1.35;
+    -webkit-font-smoothing:none; image-rendering:pixelated;
+    overflow-x:hidden;
+  }
+  img{image-rendering:pixelated; display:block; width:100%;}
+  h1,h2,h3,.pix{font-family:'Press Start 2P',monospace; line-height:1.5; letter-spacing:.5px;}
+  a{color:var(--diamond); text-decoration:none;}
+
+  /* signature offset pixel text-shadow */
+  .pix-shadow{text-shadow:3px 3px 0 var(--shadow);}
+  .glow{text-shadow:0 0 14px rgba(70,227,216,.65), 3px 3px 0 var(--shadow);}
+
+  /* Minecraft GUI panel (beveled) */
+  .panel{
+    background:var(--panel-lt);
+    border:4px solid var(--panel-edge);
+    box-shadow: inset 4px 4px 0 rgba(255,255,255,.07),
+                inset -4px -4px 0 rgba(0,0,0,.45),
+                0 0 0 4px var(--panel) ;
+    padding:30px;
+  }
+
+  /* the classic missing-texture placeholder (black + magenta) */
+  .slot{
+    position:relative; width:100%; aspect-ratio:16/9; overflow:hidden;
+    border:4px solid var(--panel-edge);
+    background:
+      conic-gradient(var(--miss-b) 90deg, var(--miss-a) 90deg 180deg,
+                     var(--miss-b) 180deg 270deg, var(--miss-a) 270deg);
+    background-size:48px 48px;
+    box-shadow: inset 4px 4px 0 rgba(255,255,255,.08), inset -4px -4px 0 rgba(0,0,0,.5);
+  }
+  .slot.square{aspect-ratio:1/1;}
+  .slot.tall{aspect-ratio:4/3;}
+  .slot img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  /* placeholder caption — only shows while an image is missing */
+  .slot .tag{display:none;}
+  .slot.empty .tag{
+    display:block; position:absolute; left:8px; bottom:8px; right:8px;
+    font-family:'Press Start 2P',monospace; font-size:9px; line-height:1.6;
+    color:#fff; background:rgba(0,0,0,.72); padding:8px 10px;
+    border-left:4px solid var(--diamond);
+  }
+  .slot .tag b{color:var(--diamond);}
+
+  /* buttons */
+  .btn{
+    display:inline-block; font-family:'Press Start 2P',monospace; font-size:13px;
+    color:#fff; text-shadow:2px 2px 0 rgba(0,0,0,.5); cursor:pointer;
+    padding:18px 26px; border:none; text-align:center;
+    background:var(--stone); box-shadow:inset 3px 3px 0 #E3E3E3, inset -3px -3px 0 #555, 0 4px 0 #2c2c2c;
+    transition:transform .05s, filter .1s; margin:6px;
+  }
+  .btn:hover{filter:brightness(1.12);}
+  .btn:active{transform:translateY(3px); box-shadow:inset 3px 3px 0 #E3E3E3, inset -3px -3px 0 #555;}
+  .btn.go{background:var(--emerald); box-shadow:inset 3px 3px 0 #79e89a, inset -3px -3px 0 var(--emerald-dk), 0 4px 0 #1c5e2c;}
+  .btn.ice{background:var(--diamond); color:#06262a; text-shadow:none; box-shadow:inset 3px 3px 0 #b6f6f0, inset -3px -3px 0 var(--diamond-dk), 0 4px 0 #0d5660;}
+
+  /* layout */
+  .wrap{max-width:1080px; margin:0 auto; padding:0 22px;}
+  section{padding:70px 0;}
+  .eyebrow{font-family:'Press Start 2P',monospace; font-size:11px; color:var(--gold);
+           text-shadow:2px 2px 0 var(--shadow); margin:0 0 18px; letter-spacing:1px;}
+  .lead{font-size:26px; color:var(--ink-dim);}
+  .center{text-align:center;}
+
+  /* ───────────────────────── Hero ───────────────────────── */
+  .hero{
+    position:relative; text-align:center; padding:64px 22px 0;
+    background:linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 45%, var(--sky-low) 100%);
+    color:#fff; overflow:hidden;
+  }
+  /* pixel clouds */
+  .cloud{position:absolute; background:#fff; opacity:.9; image-rendering:pixelated;
+         box-shadow:32px 0 #fff, 64px 0 #fff, 32px -16px #fff, 0 16px #fff, 64px 16px #fff;}
+  .c1{width:32px;height:16px;top:60px;left:10%;}
+  .c2{width:32px;height:16px;top:120px;right:12%; transform:scale(1.5);}
+  .c3{width:32px;height:16px;top:30px;right:30%; transform:scale(.8);}
+  .hero h1{font-size:30px; color:#fff; margin:14px auto 18px; max-width:18ch;}
+  .hero .sub{font-size:25px; max-width:64ch; margin:0 auto 26px; color:#0c2c4a; text-shadow:1px 1px 0 rgba(255,255,255,.4);}
+  .badges{margin:18px 0 10px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;}
+  .chip{font-family:'Press Start 2P',monospace; font-size:9px; color:#0c2c4a;
+        background:rgba(255,255,255,.55); padding:9px 11px; border:3px solid rgba(255,255,255,.85);}
+  /* hearts + xp flavor */
+  .hud{display:flex; gap:6px; justify-content:center; align-items:center; margin:24px 0 0;}
+  .heart{width:20px;height:18px;
+    background:
+      radial-gradient(circle at 30% 35%, var(--redstone) 42%, transparent 43%),
+      radial-gradient(circle at 70% 35%, var(--redstone) 42%, transparent 43%),
+      linear-gradient(var(--redstone),var(--redstone));
+    clip-path:polygon(50% 100%, 0 35%, 15% 15%, 35% 15%, 50% 35%, 65% 15%, 85% 15%, 100% 35%);
+    filter:drop-shadow(1px 1px 0 #6a1410);}
+  .xp{height:14px; flex:1; max-width:260px; background:#0c3a12; border:2px solid #042;
+      box-shadow:inset 0 0 0 2px #1a5; position:relative;}
+  .xp::after{content:""; position:absolute; inset:2px; right:30%;
+      background:repeating-linear-gradient(90deg,var(--gold) 0 8px,#e0b400 8px 10px);}
+  /* grass ground strip */
+  .ground{height:46px; margin-top:38px;
+    background:
+      linear-gradient(180deg, var(--grass-top) 0 8px, var(--grass) 8px 22px, var(--dirt) 22px 100%);
+    background-size:32px 100%;
+    box-shadow:inset 0 4px 0 rgba(255,255,255,.18), inset 0 -6px 0 rgba(0,0,0,.25);}
+  .hero-shot{max-width:980px; margin:30px auto -23px; position:relative; z-index:3;}
+
+  /* grass divider between sections */
+  .turf{height:30px; background:
+      linear-gradient(180deg,var(--grass-top) 0 6px, var(--grass) 6px 16px, var(--dirt) 16px 100%);
+      background-size:32px 100%;}
+
+  /* steps grid */
+  .grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  .step .num{font-family:'Press Start 2P',monospace; font-size:11px; color:var(--diamond);
+             margin:14px 0 6px;}
+  .step h3{font-size:14px; margin:0 0 8px;}
+  .step p{margin:0; color:var(--ink-dim); font-size:21px;}
+
+  .law h3{font-size:14px; color:var(--gold); margin:0 0 8px;}
+  .law p{margin:0; color:var(--ink-dim); font-size:21px;}
+
+  .cmd{font-family:'Press Start 2P',monospace; font-size:12px; color:var(--diamond);
+       background:#06181a; padding:6px 9px; border:2px solid var(--diamond-dk);}
+
+  footer{background:var(--panel-edge); text-align:center; padding:40px 22px; color:var(--ink-dim);}
+  footer .pix{font-size:11px; color:var(--ink);}
+
+  @media(max-width:820px){
+    .grid4{grid-template-columns:1fr 1fr;}
+    .grid3{grid-template-columns:1fr;}
+    .hero h1{font-size:22px;} h2{font-size:18px;}
+  }
+  @media(max-width:520px){
+    .grid4{grid-template-columns:1fr;}
+    body{font-size:21px;}
+  }
+
+  /* ── motion ── */
+  .c1{animation:driftA 11s ease-in-out infinite alternate;}
+  .c2{animation:driftB 14s ease-in-out infinite alternate;}
+  .c3{animation:driftC 9s ease-in-out infinite alternate;}
+  @keyframes driftA{ from{transform:translateX(0) scale(1);} to{transform:translateX(46px) scale(1);} }
+  @keyframes driftB{ from{transform:translateX(0) scale(1.5);} to{transform:translateX(-52px) scale(1.5);} }
+  @keyframes driftC{ from{transform:translateX(0) scale(.8);} to{transform:translateX(34px) scale(.8);} }
+  .xp::after{animation:xpfill 3.4s ease-in-out infinite alternate;}
+  @keyframes xpfill{ from{right:46%;} to{right:24%;} }
+  .rise{opacity:0; transform:translateY(18px); animation:rise .7s steps(6) forwards;}
+  @keyframes rise{ to{opacity:1; transform:none;} }
+  .reveal{opacity:0; transform:translateY(26px); transition:opacity .6s steps(8), transform .6s steps(8);}
+  .reveal.in{opacity:1; transform:none;}
+  .slot img{transition:transform .4s steps(6);}
+  .slot:hover img{transform:scale(1.05);}
+  @media(prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} .rise,.reveal{opacity:1; transform:none;} }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<header class="hero" id="top">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+
+  <p class="eyebrow">▸ FOR THE BUILDERS DEPLOYING FLEETS OF AI AGENTS — AND FLYING BLIND</p>
+  <h1 class="pix-shadow">Say one sentence.<br>Watch a whole AI company<br>build itself — block by block.</h1>
+  <p class="sub">Omo Mission Control turns your autonomous AI org into a <b>place you walk through.</b>
+     Drop a glowing HQ anywhere on the map. Speak a goal. A new wing rises out of the ground,
+     an agent walks in, and the wall lights up with a <b>live dashboard of your real data</b> — updating as it works.</p>
+
+  <div>
+    <a class="btn go" href="mailto:harrythentrepreneurr@gmail.com?subject=Omo%20early%20access">▶ Get early access</a>
+    <a class="btn ice" href="#mechanism">See how it works</a>
+  </div>
+
+  <div class="badges">
+    <span class="chip">⛏ Vanilla Minecraft</span>
+    <span class="chip">◆ Gemini brain</span>
+    <span class="chip">◆ ADK org</span>
+    <span class="chip">◆ MCP tools</span>
+  </div>
+
+  <div class="hud">
+    <span class="heart"></span><span class="heart"></span><span class="heart"></span>
+    <span class="heart"></span><span class="heart"></span>
+    <span class="xp"></span>
+  </div>
+
+  <!-- IMAGE: hero.png -->
+  <div class="hero-shot">
+    <div class="slot">
+      <img src="images/hero.jpg" alt="The glowing circular alien HQ on a Minecraft hillside" loading="eager" fetchpriority="high" decoding="async" onerror="this.style.display='none';this.parentElement.classList.add('empty')">
+      <span class="tag"><b>IMAGE → images/hero.jpg</b> — Glowing circular alien HQ dropped on a vanilla Minecraft hillside at golden hour; crew of agents at glowing desks, streaming screens behind them.</span>
+    </div>
+  </div>
+</header>
+<div class="ground"></div>
+
+<!-- ═══════════════════════════════ PROBLEM ═══════════════════════════════ -->
+<section>
+  <div class="wrap">
+    <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:34px;align-items:center;">
+      <div>
+        <p class="eyebrow">THE BLACK-BOX PROBLEM</p>
+        <h2 class="pix-shadow">You hired a robot<br>army you can't see.</h2>
+        <p class="lead">Your agents are invisible. You can't watch them think. You can't steer them
+        mid-task. And every new capability means a developer pre-wiring <i>another</i> agent,
+        <i>another</i> integration, <i>another</i> dashboard.</p>
+        <p class="lead">The “autonomous workforce” you were promised feels neither autonomous nor like a
+        workforce. It's a chat box bolted to a black box.</p>
+      </div>
+      <!-- IMAGE: blackbox.png -->
+      <div class="slot tall">
+        <img src="images/blackbox.jpg" alt="A lone player facing a black box in the void" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement.classList.add('empty')">
+        <span class="tag"><b>IMAGE → images/blackbox.jpg</b> — A lone Minecraft player in a dark void facing a single floating obsidian black box.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="turf"></div>
+
+<!-- ═══════════════════════════════ MECHANISM ═══════════════════════════════ -->
+<section id="mechanism" class="panel" style="margin:0;border-left:none;border-right:none;">
+  <div class="wrap center">
+    <p class="eyebrow">THE MECHANISM — HERE'S THE WHOLE TRICK</p>
+    <h2 class="glow">So we made the org a <i>place</i> —<br>and let it build itself.</h2>
+    <p class="lead" style="max-width:60ch;margin:0 auto 38px;">If the world <b>is</b> the org, then scaling
+       your team is something you can finally <i>watch happen.</i> Four moves:</p>
+
+    <div class="grid4" style="text-align:left;">
+      <!-- 1 -->
+      <div class="step">
+        <!-- IMAGE: step-speak.png -->
+        <div class="slot square">
+          <img src="images/step-speak.jpg" alt="Speaking a goal to the Chief of Staff" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement.classList.add('empty')">
+          <span class="tag"><b>step-speak.png</b></span>
+        </div>
+        <div class="num">01 · SPEAK</div>
+        <h3>Just say it.</h3>
+        <p>Walk up to your Chief of Staff: <i>“Check whether our ad spend is still paying off — and keep an eye on it.”</i></p>
+      </div>
+      <!-- 2 -->
+      <div class="step">
+        <!-- IMAGE: step-rises.png -->
+        <div class="slot square">
+          <img src="images/step-rises.jpg" alt="A new wing rising block by block" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement.classList.add('empty')">
+          <span class="tag"><b>step-rises.png</b></span>
+        </div>
+        <div class="num">02 · IT BUILDS</div>
+        <h3>The world rises.</h3>
+        <p>It thinks out loud on screen, spots a missing function, and a new wing climbs out of the ground — block by block, live.</p>
+      </div>
+      <!-- 3 -->
+      <div class="step">
+        <!-- IMAGE: step-staff.png -->
+        <div class="slot square">
+          <img src="images/step-staff.jpg" alt="A new agent walking in" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement.classList.add('empty')">
+          <span class="tag"><b>step-staff.png</b></span>
+        </div>
+        <div class="num">03 · IT STAFFS</div>
+        <h3>An agent walks in.</h3>
+        <p>A brand-new Gemini agent walks through the door and sits down — wired instantly to exactly the tools that job needs.</p>
+      </div>
+      <!-- 4 -->
+      <div class="step">
+        <!-- IMAGE: step-dashboard.png -->
+        <div class="slot square">
+          <img src="images/step-dashboard.jpg" alt="The far wall is a live dashboard" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement.classList.add('empty')">
+          <span class="tag"><b>step-dashboard.png</b></span>
+        </div>
+        <div class="num">04 · IT LIGHTS UP</div>
+        <h3>The wall comes alive.</h3>
+        <p>The far wall is a gorgeous live dashboard of your real numbers — redrawing as it pulls fresh data.</p>
+      </div>
+    </div>
+
+    <p style="margin:34px 0 0;font-size:24px;">Then just steer it:
+       <span class="cmd">/revise show 7-day window, flag ROAS &lt; 2.0</span> — and watch the board redraw.</p>
+  </div>
+</section>
+
+<div class="turf"></div>
+
+<!-- ═══════════════════════════════ THREE LAWS ═══════════════════════════════ -->
+<section>
+  <div class="wrap center">
+    <p class="eyebrow">WHY IT FEELS LIKE MAGIC</p>
+    <h2 class="pix-shadow">Three things no dashboard<br>has ever given you.</h2>
+    <div class="grid3" style="text-align:left;margin-top:36px;">
+      <div class="panel law">
+        <h3>◷ It's all real-time.</h3>
+        <p>Three live streams at once: the agent <i>thinking</i>, the world <i>rising</i>, and your <i>data</i> updating — all in front of you, no reload.</p>
+      </div>
+      <div class="panel law">
+        <h3>✦ Zero configuration.</h3>
+        <p>You state intent. The org builds the team, the rooms, and every tool connection itself. You never wire a thing.</p>
+      </div>
+      <div class="panel law">
+        <h3>✋ You're always in control.</h3>
+        <p>Every email, budget change, or payment surfaces as <b>one tap to approve.</b> Walk in, talk, revise, veto — anytime.</p>
+      </div>
+    </div>
+    <!-- IMAGE: approve.png -->
+    <div class="slot" style="margin-top:26px;max-width:760px;margin-left:auto;margin-right:auto;">
+      <img src="images/approve.jpg" alt="Tap-to-approve gate over a villager" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement.classList.add('empty')">
+      <span class="tag"><b>IMAGE → images/approve.jpg</b> — A glowing green/red “tap to approve” popup hovering over a villager about to send an email.</span>
+    </div>
+  </div>
+</section>
+
+<div class="turf"></div>
+
+<!-- ═══════════════════════════════ VISION ═══════════════════════════════ -->
+<section id="demo" class="panel" style="margin:0;border-left:none;border-right:none;">
+  <div class="wrap">
+    <p class="eyebrow center">THE ENDGAME</p>
+    <h2 class="glow center">The world is as big as the mission.<br>And it keeps growing.</h2>
+    <p class="lead center" style="max-width:62ch;margin:0 auto 28px;">Ask for one more capability and another
+       world rises. Then promote any world into a standalone, visitable business — one people can walk into,
+       spectate, and pay for. A whole skyline of autonomous companies… each one a sentence you once spoke.</p>
+    <!-- IMAGE: skyline.png -->
+    <div class="slot">
+      <img src="images/skyline.jpg" alt="A skyline of glowing Omo worlds" loading="lazy" decoding="async" onerror="this.style.display='none';this.parentElement.classList.add('empty')">
+      <span class="tag"><b>IMAGE → images/skyline.jpg</b> — An epic skyline of many glowing alien HQ worlds across a vast Minecraft landscape at dusk: a city of autonomous AI businesses.</span>
+    </div>
+
+    <div class="center" style="margin-top:40px;">
+      <p class="pix" style="font-size:15px;line-height:1.7;color:var(--gold);text-shadow:3px 3px 0 var(--shadow);">
+        “I configured none of this.”</p>
+      <p class="lead" style="max-width:56ch;margin:10px auto 26px;">The org saw what it needed, built the room,
+         hired the agent, connected the tools, and shipped — <b>live.</b></p>
+      <a class="btn go" href="mailto:harrythentrepreneurr@gmail.com?subject=Omo%20early%20access">▶ Get early access</a>
+      <a class="btn ice" href="#mechanism">See how it works</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p class="pix">OMO MISSION CONTROL</p>
+  <p>A world that builds itself for autonomous AI teams.</p>
+  <p style="margin-top:14px;">Powered by <b>Gemini</b> · Built on <b>ADK</b> · Connected over <b>MCP</b> · Runs in <b>vanilla Minecraft</b></p>
+  <p style="margin-top:14px;">
+    <a href="mailto:harrythentrepreneurr@gmail.com?subject=Omo%20early%20access">Get early access</a>
+    &nbsp;·&nbsp; <a href="#top">Back to top</a>
+  </p>
+  <p style="margin-top:14px;color:#777;">© 2026 Omo · Built for the Google for Startups AI Agents Challenge — Track 1</p>
+</footer>
+
+<script>
+  // hero entrance (staggered, pixel-stepped)
+  document.querySelectorAll('.hero > h1, .hero > p, .hero > div:not(.cloud)').forEach((el,i)=>{
+    el.classList.add('rise'); el.style.animationDelay=(0.08*i)+'s';
+  });
+  // scroll reveal — section blocks + staggered grid items
+  document.querySelectorAll('section > .wrap > *:not(.grid4):not(.grid3), section.wrap > *').forEach(el=>el.classList.add('reveal'));
+  document.querySelectorAll('.grid4 > *, .grid3 > *').forEach((el,i)=>{ el.classList.add('reveal'); el.style.transitionDelay=(0.1*(i%4))+'s'; });
+  const io = new IntersectionObserver((es)=>{ es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>

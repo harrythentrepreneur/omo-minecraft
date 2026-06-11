@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>omo@mission-control — a world that builds itself</title>
+<meta name="description" content="Say one sentence. Watch a whole AI company build itself — block by block." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet" />
+<style>
+  /* ───────── Command Console: phosphor-green CRT terminal ───────── */
+  :root{
+    --bg:#03070A; --term:#060D0C; --line:#103326;
+    --green:#41FFA6; --green-dim:#1f9e63; --ink-soft:#7fcfa8;
+    --amber:#FFC25A; --cyan:#5FE6FF; --red:#FF6B61;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--green); overflow-x:hidden;
+    font-family:'JetBrains Mono',monospace; font-size:16px; line-height:1.65;
+    text-shadow:0 0 6px rgba(65,255,166,.28);
+  }
+  /* CRT scanlines + flicker + vignette */
+  body::before{content:""; position:fixed; inset:0; z-index:99; pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px);
+    mix-blend-mode:multiply; animation:flick 5s steps(60) infinite;}
+  body::after{content:""; position:fixed; inset:0; z-index:98; pointer-events:none;
+    background:radial-gradient(120% 120% at 50% 50%, transparent 55%, rgba(0,0,0,.55) 100%);}
+  @keyframes flick{ 0%,97%{opacity:.55;} 98%{opacity:.35;} 100%{opacity:.55;} }
+
+  a{color:var(--cyan); text-decoration:none;} a:hover{text-decoration:underline;}
+  .wrap{max-width:1000px; margin:0 auto; padding:0 22px; position:relative; z-index:1;}
+  section{padding:60px 0; position:relative; z-index:1;}
+  .pix{font-family:'Press Start 2P',monospace;}
+  .dim{color:var(--ink-soft);} .amber{color:var(--amber);} .cy{color:var(--cyan);}
+  .prompt::before{content:"omo@mission-control:~$ "; color:var(--green-dim);}
+  .comment{color:var(--green-dim);}
+  h2{font-size:22px; font-weight:700; margin:0 0 12px; color:var(--green);}
+  h2::before{content:"## "; color:var(--green-dim);}
+  h3{font-size:17px; font-weight:700; margin:0 0 6px;}
+  .lead{color:var(--ink-soft); max-width:74ch; font-size:16px;}
+
+  /* window chrome */
+  .win{border:1px solid var(--line); border-radius:8px; background:var(--term);
+    box-shadow:0 0 0 1px rgba(65,255,166,.05), 0 24px 60px rgba(0,0,0,.6); overflow:hidden;}
+  .titlebar{display:flex; align-items:center; gap:8px; padding:9px 12px; border-bottom:1px solid var(--line);
+    background:#08110F; font-size:12px; color:var(--ink-soft);}
+  .dot{width:11px; height:11px; border-radius:50%;}
+  .dot.r{background:#ff5f56;} .dot.y{background:#ffbd2e;} .dot.g{background:#27c93f;}
+  .titlebar .path{margin-left:8px;}
+  .win .body{padding:18px;}
+
+  /* nav / switcher */
+  .nav{position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between;
+    padding:8px 16px; background:rgba(3,7,10,.82); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); font-size:11px;}
+  .nav .wm{color:var(--green);}
+  .switch{display:flex; gap:2px;}
+  .switch a{color:var(--ink-soft); padding:6px 8px; border-radius:5px;}
+  .switch a:hover{color:var(--green); background:rgba(65,255,166,.08); text-decoration:none;}
+  .switch a.on{color:#03100b; background:var(--green);}
+  .switch a::before{content:"["; color:var(--green-dim);}
+  .switch a::after{content:"]"; color:var(--green-dim);}
+  .switch a.on::before,.switch a.on::after{color:#03100b;}
+
+  /* blinking cursor */
+  .cur{display:inline-block; width:10px; height:1.05em; background:var(--green); vertical-align:-2px;
+    margin-left:3px; animation:blink 1.05s steps(1) infinite; box-shadow:0 0 8px rgba(65,255,166,.7);}
+  @keyframes blink{ 50%{opacity:0;} }
+
+  /* boot typing */
+  .boot{white-space:pre-wrap; font-size:14px; color:var(--ink-soft); min-height:118px;}
+  .boot b{color:var(--green);} .boot .ok{color:var(--amber);}
+
+  /* buttons */
+  .btn{display:inline-block; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px;
+    padding:11px 18px; border-radius:7px; margin:6px 6px 0 0; cursor:pointer; border:1px solid var(--green-dim);
+    color:var(--green); background:rgba(65,255,166,.06); transition:.15s; text-shadow:0 0 6px rgba(65,255,166,.4);}
+  .btn:hover{background:var(--green); color:#03100b; text-decoration:none; box-shadow:0 0 22px rgba(65,255,166,.5);}
+  .btn.ghost{border-color:var(--line); color:var(--ink-soft);}
+  .btn.ghost:hover{background:rgba(65,255,166,.08); color:var(--green);}
+
+  /* image as a "preview" window */
+  .shot{overflow:hidden;}
+  .shot img{width:100%; display:block; filter:saturate(.78) brightness(.96) contrast(1.04);
+    transition:filter .3s, transform .5s;}
+  .shot:hover img{filter:saturate(1) brightness(1.02) contrast(1.05); transform:scale(1.02);}
+
+  /* hero ascii banner */
+  .banner{font-family:'Press Start 2P',monospace; color:var(--green); line-height:1.5;
+    font-size:clamp(18px,4.4vw,40px); letter-spacing:1px; text-shadow:0 0 18px rgba(65,255,166,.5); margin:8px 0 14px;}
+
+  /* layout */
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:26px; align-items:center;}
+  .grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  .step .num{color:var(--amber); font-weight:700; margin:12px 0 4px; font-size:13px;}
+  .step p{color:var(--ink-soft); font-size:14px; margin:0;}
+  .law p{color:var(--ink-soft); font-size:14px; margin:6px 0 0;}
+  .cmd{color:var(--cyan); background:rgba(95,230,255,.08); border:1px solid #1c4654; padding:4px 8px; border-radius:5px;}
+
+  /* scroll reveal: terminal "print" */
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .5s ease, transform .5s ease;}
+  .reveal.in{opacity:1; transform:none;}
+
+  footer{border-top:1px solid var(--line); padding:36px 22px; text-align:center; color:var(--ink-soft); font-size:13px; position:relative; z-index:1;}
+
+  @media(max-width:820px){ .grid4{grid-template-columns:1fr 1fr;} .grid3{grid-template-columns:1fr;} .two{grid-template-columns:1fr;} .switch a{padding:6px 5px;} }
+  @media(max-width:520px){ .grid4{grid-template-columns:1fr;} }
+  @media(prefers-reduced-motion:reduce){ *{animation:none !important;} .reveal{opacity:1; transform:none;} }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="wm">~/omo-mission-control</span>
+  <div class="switch">
+    <a href="index.html">classic</a>
+    <a href="light.html">daylight</a>
+    <a href="cinematic.html">cinematic</a>
+    <a class="on" href="terminal.html">terminal</a>
+  </div>
+</nav>
+
+<!-- HERO / BOOT -->
+<header class="wrap" style="padding-top:74px;">
+  <div class="win">
+    <div class="titlebar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="path">omo@mission-control: ~/build — bash — 96×28</span></div>
+    <div class="body">
+      <div class="boot" id="boot"></div>
+      <p class="comment"># mission brief</p>
+      <div class="banner">OMO MISSION&nbsp;CONTROL</div>
+      <p style="font-size:18px; color:var(--green); margin:0 0 6px;">
+        Say one sentence. Watch a whole AI company build itself — <span class="amber">block by block.</span></p>
+      <p class="lead" style="margin:12px 0 0;">Omo turns your autonomous AI org into a <b style="color:var(--green)">place you walk through.</b>
+        Drop a glowing HQ anywhere. Speak a goal. A new wing rises out of the ground, an agent walks in, and the wall
+        lights up with a <b style="color:var(--green)">live dashboard of your real data</b> — updating as it works.</p>
+      <p class="prompt" style="margin:18px 0 0;">run --see-how-it-works<span class="cur"></span></p>
+      <div style="margin-top:10px;">
+        <a class="btn" href="#mechanism">▶ ./how-it-works</a>
+        <a class="btn ghost" href="#demo">./watch-demo</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="win reveal" style="margin-top:22px;">
+    <div class="titlebar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="path">preview://hero.png</span></div>
+    <div class="shot"><img src="images/hero.png" alt="Glowing circular alien HQ" /></div>
+  </div>
+</header>
+
+<!-- PROBLEM -->
+<section>
+  <div class="wrap reveal">
+    <p class="comment"># the black-box problem</p>
+    <div class="two">
+      <div>
+        <h2>You hired a robot army you can't see.</h2>
+        <p class="lead">Your agents are invisible. You can't watch them think. You can't steer them mid-task.
+           Every new capability means a dev pre-wiring <span class="amber">another</span> agent,
+           <span class="amber">another</span> integration, <span class="amber">another</span> dashboard.</p>
+        <p class="lead" style="margin-top:12px;">The "autonomous workforce" you were promised feels neither autonomous
+           nor like a workforce. <span class="red" style="color:var(--red)">It's a chat box bolted to a black box.</span></p>
+      </div>
+      <div class="win"><div class="titlebar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="path">preview://blackbox.png</span></div>
+        <div class="shot"><img src="images/blackbox.png" alt="Lone player facing a black box" /></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MECHANISM -->
+<section id="mechanism">
+  <div class="wrap reveal">
+    <p class="comment"># the mechanism — here's the whole trick</p>
+    <h2>So we made the org a place — and let it build itself.</h2>
+    <p class="lead" style="margin-bottom:30px;">If the world <b style="color:var(--green)">is</b> the org, then scaling your team
+       is something you can finally watch happen. Four moves:</p>
+    <div class="grid4">
+      <div class="step reveal"><div class="win"><div class="shot"><img src="images/step-speak.png" alt="Speak"></div></div>
+        <div class="num">01 · SPEAK</div><h3>Just say it.</h3>
+        <p>Walk up to your Chief of Staff: <i>"Check whether our ad spend is still paying off — and keep watch."</i></p></div>
+      <div class="step reveal" style="transition-delay:.08s;"><div class="win"><div class="shot"><img src="images/step-rises.png" alt="Builds"></div></div>
+        <div class="num">02 · IT BUILDS</div><h3>The world rises.</h3>
+        <p>It thinks out loud, spots a missing function, and a new wing climbs out of the ground — block by block, live.</p></div>
+      <div class="step reveal" style="transition-delay:.16s;"><div class="win"><div class="shot"><img src="images/step-staff.png" alt="Staffs"></div></div>
+        <div class="num">03 · IT STAFFS</div><h3>An agent walks in.</h3>
+        <p>A new Gemini agent walks through the door and sits down — wired instantly to exactly the tools it needs.</p></div>
+      <div class="step reveal" style="transition-delay:.24s;"><div class="win"><div class="shot"><img src="images/step-dashboard.png" alt="Lights up"></div></div>
+        <div class="num">04 · IT LIGHTS UP</div><h3>The wall comes alive.</h3>
+        <p>The far wall is a live dashboard of your real numbers — redrawing as it pulls fresh data.</p></div>
+    </div>
+    <p class="prompt reveal" style="margin-top:26px;">/revise <span class="cmd">show 7-day window, flag ROAS &lt; 2.0</span></p>
+  </div>
+</section>
+
+<!-- THREE LAWS -->
+<section>
+  <div class="wrap reveal">
+    <p class="comment"># why it feels like magic</p>
+    <h2>Three things no dashboard has ever given you.</h2>
+    <div class="grid3" style="margin-top:18px;">
+      <div class="win reveal"><div class="body law"><h3 class="amber">◷ It's all real-time.</h3>
+        <p>Three live streams at once: the agent <i>thinking</i>, the world <i>rising</i>, your <i>data</i> updating — no reload.</p></div></div>
+      <div class="win reveal" style="transition-delay:.1s;"><div class="body law"><h3 class="amber">✦ Zero configuration.</h3>
+        <p>You state intent. The org builds the team, the rooms, and every tool connection itself. You never wire a thing.</p></div></div>
+      <div class="win reveal" style="transition-delay:.2s;"><div class="body law"><h3 class="amber">✋ You're always in control.</h3>
+        <p>Every email, budget change, or payment surfaces as one tap to approve. Walk in, talk, revise, veto — anytime.</p></div></div>
+    </div>
+    <div class="win reveal" style="margin-top:20px;"><div class="titlebar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="path">preview://approve.png</span></div>
+      <div class="shot"><img src="images/approve.png" alt="Tap to approve"></div></div>
+  </div>
+</section>
+
+<!-- VISION -->
+<section id="demo">
+  <div class="wrap reveal">
+    <p class="comment"># the endgame</p>
+    <h2>The world is as big as the mission. And it keeps growing.</h2>
+    <p class="lead" style="margin-bottom:22px;">Ask for one more capability and another world rises. Then promote any world into
+       a standalone, visitable business — one people can walk into, spectate, and pay for. A whole skyline of autonomous
+       companies… each one a sentence you once spoke.</p>
+    <div class="win"><div class="titlebar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="path">preview://skyline.png</span></div>
+      <div class="shot"><img src="images/skyline.png" alt="Skyline of glowing worlds"></div></div>
+    <p class="amber" style="font-size:18px; margin-top:30px;">&gt; "I configured none of this."</p>
+    <p class="lead">The org saw what it needed, built the room, hired the agent, connected the tools, and shipped —
+       <b style="color:var(--green)">live.</b></p>
+    <div style="margin-top:14px;">
+      <a class="btn" href="#">▶ ./watch-demo --90s</a>
+      <a class="btn ghost" href="../docs/OMO_MISSION_CONTROL_PRD.md">cat VISION.md</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p class="pix" style="font-size:11px; color:var(--green);">OMO MISSION CONTROL</p>
+  <p>// a world that builds itself for autonomous AI teams</p>
+  <p style="margin-top:10px;">powered by <b style="color:var(--green)">Gemini</b> · built on <b style="color:var(--green)">ADK</b> · connected over <b style="color:var(--green)">MCP</b> · runs in <b style="color:var(--green)">vanilla Minecraft</b></p>
+  <p style="margin-top:6px; color:var(--green-dim);">Google for Startups AI Agents Challenge — Track 1 · Build</p>
+</footer>
+
+<script>
+  // typed boot sequence
+  const lines = [
+    ["omo@mission-control:~$ ", "./omo init --anywhere\n"],
+    ["", "<b>[ok]</b> dropping HQ on vanilla map .......... <span class='ok'>placed</span>\n"],
+    ["", "<b>[ok]</b> spawning founding crew (Gemini/ADK) ... <span class='ok'>3 agents online</span>\n"],
+    ["", "<b>[ok]</b> mounting MCP toolset ................. <span class='ok'>gmail · meta-ads · stripe</span>\n"],
+    ["", "<b>[ok]</b> world API ready ..................... <span class='ok'>awaiting your goal</span>\n"],
+  ];
+  const el = document.getElementById('boot');
+  let li=0, ci=0, buf="";
+  function type(){
+    if(li>=lines.length){ return; }
+    const [pre, txt] = lines[li];
+    if(ci===0){ buf += "<span class='comment'>"+pre+"</span>"; }
+    // reveal text progressively (skip html tags fast)
+    const full = txt;
+    if(ci < full.length){
+      // jump over html tags so they don't type char-by-char
+      if(full[ci]==='<'){ const close=full.indexOf('>',ci); buf+=full.slice(ci,close+1); ci=close+1; }
+      else { buf += full[ci]; ci++; }
+      el.innerHTML = buf + "<span class='cur'></span>";
+      setTimeout(type, 12);
+    } else { li++; ci=0; setTimeout(type, 90); }
+  }
+  type();
+
+  // scroll reveal
+  const io = new IntersectionObserver((es)=>{ es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }); }, {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>
