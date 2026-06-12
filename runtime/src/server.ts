@@ -9,6 +9,7 @@ import { startHttpServer } from "./http.js";
 import { startTerminalServer } from "./terminalServer.js";
 import { startMcpServer } from "./mcpServer.js";
 import { startDashboardServer, setSocietyProvider } from "./dashboardServer.js";
+import { ensureCustomDashboard } from "./dashboardArchitect.js";
 import { startDashboardFeed } from "./dashboardFeed.js";
 import { WorldStore } from "./worldStore.js";
 
@@ -41,6 +42,13 @@ startTerminalServer(manager, TERMINAL_PORT);
 startMcpServer(manager, world);
 startDashboardServer();
 startDashboardFeed();
+
+// The HQ crew's two boards get bespoke, function-designed pages too (Society is
+// already its own custom page). Pre-warmed at boot + disk-cached, so the HQ
+// triptych is custom from the first `/omo hq`. Each built function designs its
+// own page when its room is built (mcpServer world_build).
+ensureCustomDashboard("growth", "Growth", "paid acquisition, ad performance, ROAS/CAC, funnel and revenue growth");
+ensureCustomDashboard("comms", "Comms", "outreach, lifecycle email, announcements, replies and support");
 
 // Society View (/dash/society): join the live agent statuses (snapshot()) with
 // the org graph (world.list()) and the consultation log into one whole-ecosystem

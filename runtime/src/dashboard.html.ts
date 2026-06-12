@@ -987,6 +987,9 @@ const PAGE = String.raw`<!doctype html>
       .catch(function(){/* offline tolerant — keep last frame */})
       .then(function(){setTimeout(poll,POLL_MS);});
   }
+  // (The dashboard server injects a /rev reload watcher into every served page,
+  //  so this generic placeholder upgrades itself to the bespoke design — and any
+  //  later redesign — automatically. Nothing to do here.)
 
   // ---------- raf loop ----------
   function frame(now){

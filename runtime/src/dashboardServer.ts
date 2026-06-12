@@ -129,6 +129,33 @@ export function getDashboardData(id: string): DashboardData | undefined {
   return store.get(id);
 }
 
+// Bespoke per-function pages designed by the dashboard architect. When one is
+// registered for an id it is served at GET /dash/:id INSTEAD of the generic
+// template, so each room's screen is custom to its function — while the
+// /dash/:id/data contract stays identical, so live updates keep flowing.
+const customHtml = new Map<string, string>();
+// Revision per id — bumped on every (re)design. Every served page polls
+// /dash/:id/rev and reloads when it changes, so a new or redesigned dashboard
+// swaps onto the in-world wall live (no re-navigation needed).
+const revs = new Map<string, number>();
+
+/** Register a bespoke, function-designed HTML page for an id (overrides the generic template). */
+export function setDashboardHtml(id: string, html: string): void {
+  customHtml.set(id, html);
+  revs.set(id, (revs.get(id) ?? 0) + 1);
+}
+
+/** Inject a tiny watcher that reloads the page when its /rev changes — so a
+ *  freshly designed or redesigned dashboard swaps onto the in-world wall live. */
+function withReloadWatcher(html: string, id: string, rev: number): string {
+  const watcher =
+    `<script>(function(){var r=${rev},u=${JSON.stringify(`/dash/${encodeURIComponent(id)}/rev`)};` +
+    `setInterval(function(){fetch(u,{cache:"no-store"}).then(function(x){return x.ok?x.text():"";})` +
+    `.then(function(t){var n=parseInt(t,10);if(!isNaN(n)&&n!==r){location.reload();}}).catch(function(){});},2000);})();</script>`;
+  const i = html.toLowerCase().lastIndexOf("</body>");
+  return i >= 0 ? html.slice(0, i) + watcher + html.slice(i) : html + watcher;
+}
+
 /** Tasteful empty-state so a never-seeded id still renders something on-camera. */
 function emptyState(id: string): DashboardData {
   return {
@@ -373,6 +400,13 @@ function handle(req: IncomingMessage, res: ServerResponse): void {
     return;
   }
 
+  // Silence the browser's automatic favicon request so headless pages log no
+  // 404 (the cinema mirrors console.error into the face log).
+  if (pathname === "/favicon.ico") {
+    res.writeHead(204).end();
+    return;
+  }
+
   // Society View — the whole-ecosystem board. Special-cased above the generic
   // /dash/:id route because its payload shape differs from DashboardData.
   if (pathname === "/dash/society" || pathname === "/dash/society/") {
@@ -387,13 +421,25 @@ function handle(req: IncomingMessage, res: ServerResponse): void {
     return;
   }
 
+  // /dash/:id/rev → the page's current revision (a number). Every served page
+  // polls this and reloads when it changes, so a new/redesigned page swaps in.
+  const revMatch = pathname.match(/^\/dash\/([^/]+)\/rev\/?$/);
+  if (revMatch) {
+    sendText(res, 200, String(revs.get(decodeURIComponent(revMatch[1]!)) ?? 0));
+    return;
+  }
+
   const parsed = parseDashPath(pathname);
   if (parsed) {
     if (parsed.isData) {
       const data = store.get(parsed.id) ?? emptyState(parsed.id);
       sendJson(res, 200, data);
     } else {
-      sendHtml(res, 200, dashboardHtml(parsed.id));
+      // A bespoke, function-designed page if the architect built one; else the
+      // generic template. Either way it carries the reload watcher, so it
+      // upgrades to a fresh design (or a redesign) the moment one lands.
+      const page = customHtml.get(parsed.id) ?? dashboardHtml(parsed.id);
+      sendHtml(res, 200, withReloadWatcher(page, parsed.id, revs.get(parsed.id) ?? 0));
     }
     return;
   }

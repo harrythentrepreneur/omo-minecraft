@@ -30,15 +30,26 @@ root_agent = LlmAgent(
         "whenever you have something worth showing — right after you pull fresh data, when you "
         "reach a finding or decision, and at the end of every task — with a clear title, the key "
         "KPIs, and a short feed of what you just did. Treat the board as your live status: if it "
-        "would change what the owner sees, push an update. Revise it on request too. When you need a number, fact, "
-        "or judgement that ANOTHER function owns, don't guess — use world_consult(from_function, "
+        "would change what the owner sees, push an update. Revise it on request too. There are TWO different "
+        "ways to change your screen: dashboard_update changes the DATA shown; design_dashboard re-designs the "
+        "PAGE ITSELF. If the owner asks to change how the screen / website / board LOOKS — its design, layout, "
+        "colours, theme, or which sections it has (e.g. 'make it dark red', 'add a competitors section', "
+        "'redesign it to focus on retention', 'make the chart bigger') — call design_dashboard(function_id, "
+        "instructions) with exactly what they asked for; the wall reloads into the new design. When you need a "
+        "number, fact, or judgement that ANOTHER function owns, don't guess — use world_consult(from_function, "
         "to_function, question) to ask that function's specialist and use their answer. Keep replies to "
         "1-3 sentences; your reasoning streams onto the screens in your room."
     ),
     tools=[
         McpToolset(
             connection_params=StreamableHTTPConnectionParams(url=MCP_URL, headers=_HEADERS),
-            tool_filter=["meta_ads_list_campaigns", "meta_ads_insights", "dashboard_update", "world_consult"],
+            tool_filter=[
+                "meta_ads_list_campaigns",
+                "meta_ads_insights",
+                "dashboard_update",
+                "design_dashboard",
+                "world_consult",
+            ],
         )
     ],
 )

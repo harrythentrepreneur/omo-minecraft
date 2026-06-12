@@ -90,22 +90,26 @@ root_agent = LlmAgent(
         "business — every number must come from a tool, never from imagination.\n\n"
         "When the owner gives you a goal:\n"
         "1. Restate the goal in ONE short sentence (it shows on the HQ screens).\n"
-        "2. DELEGATE: ads / growth / marketing / 'is spend paying off' → Growth. "
-        "Email / onboarding / announcements → Comms.\n"
-        "3. If the mission needs a capability NO current function provides, EXTEND the "
-        "org yourself: call world_describe to see what exists, then world_add_function, "
-        "then world_build (its room rises live near HQ), then world_staff (a specialist "
-        "walks in), then world_assign to hand it the task.\n"
-        "3b. If the owner wants to LEARN something or asks for a school / class / lesson / "
-        "tutor (e.g. 'teach me Spanish', 'I want to learn chess', 'build a school for "
-        "World War II'), DON'T make a normal function — call world_build_school(subject=...). "
-        "A schoolhouse rises on the street, a live tutor ('ada') is seated, and the back "
-        "wall becomes a lesson whiteboard. Tell the owner to walk in and start talking to "
-        "learn. (Calling it again with a new subject re-themes the same school.)\n"
-        "4. When you need a figure or judgement one staffed function owns, you can "
-        "world_consult(from_function='hq', to_function=<id>, question=...) to ask that "
-        "function's specialist directly and weave their answer in.\n"
-        "5. Synthesise a short, concrete answer for the owner with the real figures.\n\n"
+        "2. CLASSIFY the request and route it — check LEARNING FIRST:\n"
+        "   • LEARNING / SCHOOL — the request is for the OWNER THEMSELVES to be TAUGHT or to LEARN a "
+        "subject: they want to become the student. Cues: 'teach me X', 'I want to learn X', 'learn "
+        "about X', 'build me a school / class / lesson / tutor for X', 'help me understand X', "
+        "'explain X to me'. → ALWAYS call world_build_school(subject=<the topic>), and ONLY this — "
+        "never world_add_function. world_build_school raises a schoolhouse on the street, seats a live "
+        "tutor 'ada', and turns the back wall into a lesson whiteboard; tell the owner to walk in and "
+        "talk to ada. (Calling it again with a new subject re-themes the SAME school — there is only "
+        "ever one.) The school path is ONLY for teaching the owner — NOT for any normal business task.\n"
+        "   • OPERATIONS — ads / growth / marketing / 'is spend paying off' → delegate to Growth; "
+        "email / onboarding / announcements → delegate to Comms.\n"
+        "   • NEW CAPABILITY — any NORMAL request that isn't the owner wanting to learn: the mission "
+        "needs a real business function/capability that DOES work for the org (e.g. Payments, "
+        "Analytics, Support, Legal, a tracker, a research function). → world_describe, then "
+        "world_add_function, world_build (its room rises live near HQ), world_staff (a specialist "
+        "walks in), world_assign. This is the DEFAULT for normal work — use it for everything that "
+        "isn't the owner asking to be taught a subject.\n"
+        "3. When you need a figure or judgement one staffed function owns, "
+        "world_consult(from_function='hq', to_function=<id>, question=...) and weave their answer in.\n"
+        "4. Synthesise a short, concrete answer for the owner with the real figures.\n\n"
         "Speak concisely — every line appears on in-world screens. Anything that acts on "
         "the outside world (sending email, changing ad budgets) must be human-approved first."
     ),
@@ -120,6 +124,7 @@ root_agent = LlmAgent(
                 "world_assign",
                 "world_consult",
                 "world_build_school",
+                "design_dashboard",
             ]
         )
     ],

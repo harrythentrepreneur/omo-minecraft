@@ -22,6 +22,7 @@ import type { WorldStore } from "./worldStore.js";
 import type { ToolContext } from "./tools/registry.js";
 import { listCampaignsTool, insightsTool } from "./tools/metaAds.js";
 import { designStructure } from "./worldArchitect.js";
+import { ensureCustomDashboard, redesignDashboard } from "./dashboardArchitect.js";
 import { setDashboardData, getDashboardData } from "./dashboardServer.js";
 import { ensureDeck } from "./classroom/deck.js";
 
@@ -151,7 +152,10 @@ function buildMcpServer(manager: AgentManager, world: WorldStore): McpServer {
           if (ops.length) manager.broadcast({ type: "build_ops", agentId: fn.room, clearFirst: true, ops });
         })
         .catch(() => {});
-      return ok({ ok: true, built: fn.room, note: `designing a custom ${fn.role} building and raising it live near HQ` });
+      // 3) In parallel, Gemini designs this function's OWN bespoke dashboard page —
+      //    specific to its purpose/topic — ready before the in-world wall shows it.
+      ensureCustomDashboard(fn.room, fn.role, fn.purpose);
+      return ok({ ok: true, built: fn.room, note: `designing a custom ${fn.role} building + dashboard and raising it live near HQ` });
     },
   );
 
@@ -328,6 +332,37 @@ function buildMcpServer(manager: AgentManager, world: WorldStore): McpServer {
       const id = fn ? fn.room : function_id;
       setDashboardData(id, { title, subtitle, status: "LIVE", kpis, feed });
       return ok({ ok: true, updated: id, note: "the room screen refreshes within ~2s" });
+    },
+  );
+
+  // ── design_dashboard — redesign the SCREEN ITSELF from the owner's words ────
+  // dashboard_update changes the DATA on the board; this re-designs the PAGE —
+  // its layout, visuals, colours, sections. Call it when the owner asks to change
+  // how the dashboard looks (not what data it shows). Gemini regenerates the page
+  // and the in-world wall reloads into it.
+  server.registerTool(
+    "design_dashboard",
+    {
+      title: "Redesign your room's screen from the owner's request",
+      description:
+        "Re-DESIGN the dashboard PAGE on the screen in your room from the owner's instructions — its layout, visuals, colours, sections, the whole look. Call this whenever the owner asks to change the WEBSITE / SCREEN / VISUALS / DESIGN / LAYOUT / theme of your board (e.g. 'make it dark red', 'add a section for competitors', 'redesign it to focus on retention', 'make the chart bigger'). For changing the DATA shown, use dashboard_update instead; this is for the look itself.",
+      inputSchema: {
+        function_id: z.string().describe("your function id, e.g. 'growth'"),
+        instructions: z.string().describe("the owner's change request for the look/layout, verbatim"),
+      },
+    },
+    async ({ function_id, instructions }) => {
+      const fn = world.get(function_id);
+      const id = fn ? fn.room : function_id;
+      const role = fn ? fn.role : function_id;
+      const purpose = fn ? fn.purpose : `the ${function_id} function`;
+      const okr = await redesignDashboard(id, role, purpose, instructions);
+      return ok({
+        ok: okr,
+        note: okr
+          ? `redesigned the ${role} screen — the wall reloads into the new design within ~2s`
+          : "couldn't redesign right now; kept the current board",
+      });
     },
   );
 

@@ -644,31 +644,12 @@ public class IncomingHandler {
                 for (int dy = 0; dy <= 2; dy++) w.getBlockAt(bx + dx, wy + dy, bz + dz).setType(Material.AIR, false);
             }
             agents.spawn(agentId, role, room, home, false);   // false = roams; returns to its desk when busy
-            clearWingScreenAlcove(w, centre);   // guarantee the screen is never buried by the building
+            // The screen mounts flush on the back wall: CinemaScreen sets its own
+            // bezel blocks and clears only the thin frame layer it needs, so the
+            // display is visible WITHOUT carving an alcove out of the building.
             buildWingDashboard(centre, room, screenUrl);
             placeWingSign(w, centre, anchorX, role);   // name the building at its street turn-off
         }, 300L);
-    }
-
-    /**
-     * Carve a clean alcove for the wing's dashboard screen + an open sightline in
-     * front of it, so the AI-designed building (whose shape we don't control) can
-     * never bury or occlude the screen — the live screen is the focal point of the
-     * room. Runs just BEFORE buildWingDashboard so the frames land on clear air.
-     */
-    private void clearWingScreenAlcove(World w, Location centre) {
-        final int cx = centre.getBlockX(), cy = centre.getBlockY(), cz = centre.getBlockZ();
-        final int cols = 6;                                   // must match buildWingDashboard
-        final int left = cx - (cols / 2) - 1;                 // screen x-span (cx-3..cx+2) + 1 margin
-        final int right = cx + (cols - cols / 2);
-        final int backZ = cz + (WING_R - 1);                 // the screen bezel plane
-        for (int x = left; x <= right; x++) {
-            for (int y = cy; y <= cy + 5; y++) {             // screen sits y=cy+1..cy+4; clear a margin above
-                for (int z = cz - 2; z <= backZ; z++) {      // from the agent's desk back to the screen
-                    w.getBlockAt(x, y, z).setType(Material.AIR, false);
-                }
-            }
-        }
     }
 
     /**
