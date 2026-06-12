@@ -210,6 +210,7 @@ public class IncomingHandler {
             case "spawn_team_request"   -> handleSpawnTeamRequest(m);
             case "spawn_village_request" -> handleSpawnVillageRequest(m);
             case "spawn_code_request"   -> handleSpawnCodeRequest(m);
+            case "spawn_hermes_request" -> handleSpawnHermesRequest(m);
             case "despawn_agent_request" -> handleDespawnAgentRequest(m);
             case "open_terminal_request" -> handleOpenTerminalRequest(m);
             case "ensure_terminal_agent_request" -> handleEnsureTerminalAgentRequest(m);
@@ -600,6 +601,9 @@ public class IncomingHandler {
         String agentId = jsonString(m, "agentId", "");
         String role = jsonString(m, "role", "Specialist");
         String room = jsonString(m, "room", "");
+        // Optional back-wall screen URL. A school wing passes the live /whiteboard
+        // so the tutor's lesson slides show; specialists leave it blank → /dash board.
+        final String screenUrl = jsonString(m, "screenUrl", "");
         if (agentId.isEmpty() || room.isEmpty()) {
             plugin.getLogger().warning("world_staff_request: missing agentId/room");
             return;
@@ -608,6 +612,10 @@ public class IncomingHandler {
         if (centre == null) { plugin.getLogger().warning("world_staff_request: no HQ anchor"); return; }
         wingCenters.put(agentId, centre.clone());   // for the thinking-glow ring
         final World w = centre.getWorld();
+        // HQ anchor X — the street runs to/from here; the naming signpost sits on
+        // the street kerb (outside this wing's build plot) so clear-first can't wipe it.
+        Room signAnchor = plugin.rooms().get(jsonString(m, "anchorRoom", "hq"));
+        final int anchorX = signAnchor != null ? (int) Math.floor(signAnchor.x()) : centre.getBlockX();
         // The agent stands just in front of its lectern, facing the −z door.
         final Location home = new Location(w,
             centre.getBlockX() + 0.5, centre.getBlockY(), centre.getBlockZ() - 1.5, 180f, 0f);
@@ -636,43 +644,77 @@ public class IncomingHandler {
                 for (int dy = 0; dy <= 2; dy++) w.getBlockAt(bx + dx, wy + dy, bz + dz).setType(Material.AIR, false);
             }
             agents.spawn(agentId, role, room, home, false);   // false = roams; returns to its desk when busy
-            buildWingDashboard(centre, room);
-            placeWingSign(w, centre, role);   // name the building on its path (door faces this path)
+            clearWingScreenAlcove(w, centre);   // guarantee the screen is never buried by the building
+            buildWingDashboard(centre, room, screenUrl);
+            placeWingSign(w, centre, anchorX, role);   // name the building at its street turn-off
         }, 300L);
     }
 
     /**
-     * A standing sign on the wing's −z street frontage, naming the building (its
-     * role), facing back down the street so you read it as you walk up. Placed
-     * AFTER the building lands so the clear-first never wipes it.
+     * Carve a clean alcove for the wing's dashboard screen + an open sightline in
+     * front of it, so the AI-designed building (whose shape we don't control) can
+     * never bury or occlude the screen — the live screen is the focal point of the
+     * room. Runs just BEFORE buildWingDashboard so the frames land on clear air.
      */
-    private void placeWingSign(World w, Location centre, String role) {
+    private void clearWingScreenAlcove(World w, Location centre) {
+        final int cx = centre.getBlockX(), cy = centre.getBlockY(), cz = centre.getBlockZ();
+        final int cols = 6;                                   // must match buildWingDashboard
+        final int left = cx - (cols / 2) - 1;                 // screen x-span (cx-3..cx+2) + 1 margin
+        final int right = cx + (cols - cols / 2);
+        final int backZ = cz + (WING_R - 1);                 // the screen bezel plane
+        for (int x = left; x <= right; x++) {
+            for (int y = cy; y <= cy + 5; y++) {             // screen sits y=cy+1..cy+4; clear a margin above
+                for (int z = cz - 2; z <= backZ; z++) {      // from the agent's desk back to the screen
+                    w.getBlockAt(x, y, z).setType(Material.AIR, false);
+                }
+            }
+        }
+    }
+
+    /**
+     * A standing signpost at this wing's street turn-off, naming the building (its
+     * role) and facing back toward HQ so you read it as you walk down the street and
+     * know where to turn. Sits on the street kerb (x = hx ± 2), which is OUTSIDE the
+     * wing's build plot, so neither the AI clear-first nor the fallback-pod clear
+     * can wipe it.
+     */
+    private void placeWingSign(World w, Location centre, int hx, String role) {
         final int cx = centre.getBlockX(), cz = centre.getBlockZ(), wy = centre.getBlockY();
-        final int sx = cx + 2;                         // beside the −z door, clear of the spur aisle
-        final int sz = cz - WING_R - 1;                // on the path, just in front of the door
+        final int side = Integer.signum(cx - hx);
+        final int sx = hx + (side == 0 ? 3 : side * 2);   // the street kerb on this wing's side
+        final int sz = cz + 1;                            // one row toward HQ from the spur mouth
         w.getBlockAt(sx, wy - 1, sz).setType(Material.SMOOTH_QUARTZ, false);   // footing
         w.getBlockAt(sx, wy, sz).setType(Material.SMOOTH_QUARTZ, false);       // post
         org.bukkit.block.Block sb = w.getBlockAt(sx, wy + 1, sz);
         sb.setType(Material.OAK_SIGN, false);
         org.bukkit.block.data.BlockData bd = sb.getBlockData();
         if (bd instanceof org.bukkit.block.data.Rotatable rot) {
-            rot.setRotation(BlockFace.NORTH);          // face down the street (−z)
+            rot.setRotation(BlockFace.SOUTH);             // face +z, toward the player coming from HQ
             sb.setBlockData(bd, false);
         }
         if (sb.getState() instanceof org.bukkit.block.Sign sign) {
             sign.getSide(org.bukkit.block.sign.Side.FRONT).line(1,
                     net.kyori.adventure.text.Component.text(prettyRole(role)));
             sign.getSide(org.bukkit.block.sign.Side.FRONT).line(2,
-                    net.kyori.adventure.text.Component.text("this way"));
+                    net.kyori.adventure.text.Component.text("▸ this way"));
             sign.update();
         }
     }
 
-    /** "growth" → "Growth"; blank → "Function". */
+    /** A short, title-cased building name for a sign line (signs fit ~15 chars):
+     *  "payments / finance" → "Payments", "growth" → "Growth". */
     private static String prettyRole(String role) {
         if (role == null || role.isBlank()) return "Function";
         String r = role.trim();
-        return Character.toUpperCase(r.charAt(0)) + r.substring(1);
+        int cut = r.length();
+        for (int i = 0; i < r.length(); i++) {
+            char c = r.charAt(i);
+            if (c == '/' || c == ' ' || c == ',') { cut = i; break; }
+        }
+        r = r.substring(0, cut).trim();
+        if (r.isEmpty()) return "Function";
+        r = Character.toUpperCase(r.charAt(0)) + r.substring(1);
+        return r.length() > 15 ? r.substring(0, 15) : r;
     }
 
     // A small futuristic "alien pod" wing, in LOCAL plot coords (pod centre at
@@ -731,7 +773,7 @@ public class IncomingHandler {
      * the −z entrance — the focal "main wall" you see as you walk in, behind the
      * agent. Points at the function's own board (/dash/&lt;room&gt;).
      */
-    private void buildWingDashboard(Location centre, String room) {
+    private void buildWingDashboard(Location centre, String room, String screenUrl) {
         if (plugin.cinema() == null || centre.getWorld() == null) return;
         final int cols = 6, rows = 4;   // big — the main wall of the room
         Location topLeftWall = new Location(centre.getWorld(),
@@ -741,7 +783,11 @@ public class IncomingHandler {
         CinemaScreen.Result r = CinemaScreen.build(
                 topLeftWall, BlockFace.NORTH, cols, rows, Material.POLISHED_BLACKSTONE, store);
         plugin.cinema().registerScreen(r.geometry());
-        final String url = "http://127.0.0.1:8088/dash/" + room;   // this function's own board
+        // A school wing overrides this with the live /whiteboard; specialists use
+        // their own /dash board.
+        final String url = (screenUrl != null && !screenUrl.isEmpty())
+                ? screenUrl
+                : "http://127.0.0.1:8088/dash/" + room;
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> plugin.cinema().setUrl(id, url));
     }
 
@@ -793,6 +839,24 @@ public class IncomingHandler {
             return;
         }
         String cmd = "omo spawn-code " + agentId + " " + cwd + " " + task;
+        Bukkit.getScheduler().runTask(plugin,
+            () -> Bukkit.dispatchCommand(p, cmd));
+    }
+
+    // A Hermes host villager started a new Hermes world via its start_hermes_world
+    // tool. Mirror of handleSpawnCodeRequest: re-enter the live /omo spawn path
+    // as the host player so room-kind → brain selection works unchanged.
+    //   { type:"spawn_hermes_request", agentId:string, role:string, playerName?:string|null }
+    private void handleSpawnHermesRequest(JsonObject m) {
+        String agentId = m.get("agentId").getAsString();
+        String role    = m.has("role") && !m.get("role").isJsonNull()
+            ? m.get("role").getAsString() : "assistant";
+        Player p = resolveTargetPlayer(m);
+        if (p == null) {
+            plugin.getLogger().warning("spawn_hermes_request: no online player to act as");
+            return;
+        }
+        String cmd = "omo spawn " + agentId + " " + role;
         Bukkit.getScheduler().runTask(plugin,
             () -> Bukkit.dispatchCommand(p, cmd));
     }

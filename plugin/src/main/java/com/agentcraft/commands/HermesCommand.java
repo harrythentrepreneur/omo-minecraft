@@ -630,25 +630,29 @@ public class HermesCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Raise THREE live dashboard screens on the +z back wall behind the command
-     * row — one per crew member — forming the HQ command-center triptych the
-     * player sees walking in (each a DIFFERENT live board):
+     * Raise THREE live dashboard screens as a console triptych across the back of
+     * the command room, behind the seated crew — one per member, each a DIFFERENT
+     * live board, the command-center wall the player sees walking in:
      *   • Comms seat (−x)   → /dash/comms    (outreach + lifecycle)
      *   • Chief of Staff    → /dash/society  (the whole-org overview graph)
      *   • Growth seat (+x)  → /dash/growth   (live Meta Ads performance)
      * NORTH-facing (toward the −z entrance) so they render right-side-up; the
-     * CinemaScreen renderer mirror-compensates per column, same as the wings.
+     * CinemaScreen renderer mirror-compensates per column, same as the wings. The
+     * panels are spaced 7 apart (cols+2) so their frame-clear boxes — which extend
+     * ±1.5 past each screen plus the item-frame width — never delete a neighbour's
+     * tiles, so all three stay full 5-wide. backZ=cz+3 keeps the 18-wide chord
+     * inside the drum and its frames clear of the central soul-lantern strip.
      */
     private void buildHqDashboard(Location base) {
         if (plugin.cinema() == null) return;
         World w = base.getWorld();
         if (w == null) return;
         final int cols = 5, rows = 4;
-        final int backZ = base.getBlockZ() + 5;          // back wall, behind the seated crew
+        final int backZ = base.getBlockZ() + 3;          // across the back of the command room
         final int topY  = base.getBlockY() + 6;          // floats above the crew's heads, 4 tall
-        hqScreen(w, base.getBlockX() - 5, backZ, topY, cols, rows, "hq-comms",  "comms");
+        hqScreen(w, base.getBlockX() - 7, backZ, topY, cols, rows, "hq-comms",  "comms");
         hqScreen(w, base.getBlockX(),     backZ, topY, cols, rows, "hq",        "society");
-        hqScreen(w, base.getBlockX() + 5, backZ, topY, cols, rows, "hq-growth", "growth");
+        hqScreen(w, base.getBlockX() + 7, backZ, topY, cols, rows, "hq-growth", "growth");
     }
 
     /** One NORTH-facing HQ screen centred on {@code centreX}, pointed at /dash/{board}. */

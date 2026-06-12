@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Try Omo Mission Control — run it locally</title>
+<meta name="description" content="Watch the demo, then run Omo Mission Control on your own machine in a few commands. Clone the repo, drop in a free Gemini key, run ./agentcraft, and walk into your self-building AI org in Minecraft." />
+<meta name="author" content="Omo" />
+<meta name="robots" content="index,follow" />
+<meta name="theme-color" content="#1E1E22" />
+<meta name="color-scheme" content="dark" />
+<link rel="canonical" href="https://omo.computer/try" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Omo Mission Control" />
+<meta property="og:title" content="Try Omo — run a self-building AI org on your machine." />
+<meta property="og:description" content="Watch the demo, then clone the repo, add a free Gemini key, run one command, and walk into it in Minecraft." />
+<meta property="og:url" content="https://omo.computer/try" />
+<meta property="og:image" content="https://omo.computer/images/hero.jpg" />
+<meta property="og:image:width" content="1500" />
+<meta property="og:image:height" content="844" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Try Omo — run a self-building AI org on your machine." />
+<meta name="twitter:image" content="https://omo.computer/images/hero.jpg" />
+
+<!-- pixel grass-block favicon -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%236BBF3B'/%3E%3Crect width='16' height='5' fill='%238FE05A'/%3E%3Crect x='5' y='6' width='6' height='6' fill='%2346E3D8'/%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+<style>
+  /* ───────────────────────── Minecraft design system (shared with index) ───────────────────────── */
+  :root{
+    --sky-top:#5B93FF; --sky-mid:#79A6FF; --sky-low:#BFE0FF;
+    --grass:#6BBF3B; --grass-top:#8FE05A; --dirt:#7A5132; --dirt-dk:#5A3A22;
+    --stone:#9A9A9A; --stone-lt:#C6C6C6; --stone-dk:#5A5A5A;
+    --panel:#1E1E22; --panel-lt:#2C2C32; --panel-edge:#0C0C0E;
+    --ink:#F4F4F4; --ink-dim:#B9C0C8; --shadow:#2A2A2A;
+    --diamond:#46E3D8; --diamond-dk:#1FA6B4;
+    --emerald:#43C463; --emerald-dk:#2C8C44;
+    --gold:#FFD13B; --gold-dk:#C99A00;
+    --redstone:#E5413B;
+    --miss-a:#000000; --miss-b:#F800F8;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--panel); color:var(--ink);
+    font-family:'VT323',monospace; font-size:23px; line-height:1.35;
+    -webkit-font-smoothing:none; image-rendering:pixelated; overflow-x:hidden;
+  }
+  img{image-rendering:pixelated; display:block; width:100%;}
+  h1,h2,h3,.pix{font-family:'Press Start 2P',monospace; line-height:1.5; letter-spacing:.5px;}
+  a{color:var(--diamond); text-decoration:none;}
+  .pix-shadow{text-shadow:3px 3px 0 var(--shadow);}
+  .glow{text-shadow:0 0 14px rgba(70,227,216,.65), 3px 3px 0 var(--shadow);}
+
+  .panel{
+    background:var(--panel-lt); border:4px solid var(--panel-edge);
+    box-shadow: inset 4px 4px 0 rgba(255,255,255,.07), inset -4px -4px 0 rgba(0,0,0,.45), 0 0 0 4px var(--panel);
+    padding:30px;
+  }
+  .slot{
+    position:relative; width:100%; aspect-ratio:16/9; overflow:hidden;
+    border:4px solid var(--panel-edge);
+    background:conic-gradient(var(--miss-b) 90deg, var(--miss-a) 90deg 180deg, var(--miss-b) 180deg 270deg, var(--miss-a) 270deg);
+    background-size:48px 48px;
+    box-shadow: inset 4px 4px 0 rgba(255,255,255,.08), inset -4px -4px 0 rgba(0,0,0,.5);
+  }
+  .slot img,.slot video,.slot iframe{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border:0;}
+
+  .btn{
+    display:inline-block; font-family:'Press Start 2P',monospace; font-size:13px;
+    color:#fff; text-shadow:2px 2px 0 rgba(0,0,0,.5); cursor:pointer;
+    padding:18px 26px; border:none; text-align:center;
+    background:var(--stone); box-shadow:inset 3px 3px 0 #E3E3E3, inset -3px -3px 0 #555, 0 4px 0 #2c2c2c;
+    transition:transform .05s, filter .1s; margin:6px;
+  }
+  .btn:hover{filter:brightness(1.12);}
+  .btn:active{transform:translateY(3px); box-shadow:inset 3px 3px 0 #E3E3E3, inset -3px -3px 0 #555;}
+  .btn.go{background:var(--emerald); box-shadow:inset 3px 3px 0 #79e89a, inset -3px -3px 0 var(--emerald-dk), 0 4px 0 #1c5e2c;}
+  .btn.ice{background:var(--diamond); color:#06262a; text-shadow:none; box-shadow:inset 3px 3px 0 #b6f6f0, inset -3px -3px 0 var(--diamond-dk), 0 4px 0 #0d5660;}
+  .btn.gold{background:var(--gold); color:#3a2a00; text-shadow:none; box-shadow:inset 3px 3px 0 #ffe486, inset -3px -3px 0 var(--gold-dk), 0 4px 0 #7a5e00;}
+
+  .wrap{max-width:1080px; margin:0 auto; padding:0 22px;}
+  section{padding:60px 0;}
+  .eyebrow{font-family:'Press Start 2P',monospace; font-size:11px; color:var(--gold);
+           text-shadow:2px 2px 0 var(--shadow); margin:0 0 18px; letter-spacing:1px;}
+  .lead{font-size:25px; color:var(--ink-dim);}
+  .center{text-align:center;}
+  .turf{height:30px; background:linear-gradient(180deg,var(--grass-top) 0 6px, var(--grass) 6px 16px, var(--dirt) 16px 100%); background-size:32px 100%;}
+
+  /* ── top nav bar ── */
+  .nav{display:flex; align-items:center; justify-content:space-between; gap:12px;
+       padding:14px 22px; background:var(--panel-edge); border-bottom:4px solid #000;}
+  .nav .home{font-family:'Press Start 2P',monospace; font-size:12px; color:var(--ink);}
+  .nav .right a{font-family:'Press Start 2P',monospace; font-size:10px; margin-left:14px;}
+
+  /* ── hero ── */
+  .hero{position:relative; text-align:center; padding:56px 22px 0;
+        background:linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 45%, var(--sky-low) 100%); color:#fff; overflow:hidden;}
+  .cloud{position:absolute; background:#fff; opacity:.9; box-shadow:32px 0 #fff, 64px 0 #fff, 32px -16px #fff, 0 16px #fff, 64px 16px #fff;}
+  .c1{width:32px;height:16px;top:50px;left:10%;} .c2{width:32px;height:16px;top:110px;right:12%; transform:scale(1.5);}
+  .hero h1{font-size:28px; color:#fff; margin:12px auto 16px; max-width:20ch;}
+  .hero .sub{font-size:24px; max-width:60ch; margin:0 auto 24px; color:#0c2c4a; text-shadow:1px 1px 0 rgba(255,255,255,.4);}
+  .badges{margin:16px 0 6px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;}
+  .chip{font-family:'Press Start 2P',monospace; font-size:9px; color:#0c2c4a; background:rgba(255,255,255,.55); padding:9px 11px; border:3px solid rgba(255,255,255,.85);}
+  .ground{height:46px; margin-top:34px;
+    background:linear-gradient(180deg, var(--grass-top) 0 8px, var(--grass) 8px 22px, var(--dirt) 22px 100%); background-size:32px 100%;
+    box-shadow:inset 0 4px 0 rgba(255,255,255,.18), inset 0 -6px 0 rgba(0,0,0,.25);}
+
+  /* ── demo video ── */
+  .video-wrap{max-width:920px; margin:0 auto;}
+  .play{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;}
+  .play .tri{width:0;height:0; border-style:solid; border-width:28px 0 28px 48px;
+    border-color:transparent transparent transparent #fff; filter:drop-shadow(3px 3px 0 rgba(0,0,0,.5));}
+  .play .ring{position:absolute; width:104px;height:104px; border:6px solid #fff; border-radius:0;
+    box-shadow:0 0 0 4px rgba(0,0,0,.4), inset 0 0 0 4px rgba(0,0,0,.25); background:rgba(70,227,216,.18);}
+  .vid-cap{display:block; margin-top:12px; font-family:'Press Start 2P',monospace; font-size:9px; line-height:1.7;
+    color:#fff; background:rgba(0,0,0,.72); padding:10px 12px; border-left:4px solid var(--diamond);}
+  .vid-cap b{color:var(--diamond);}
+
+  /* ── prerequisites grid ── */
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  .req h3{font-size:13px; margin:0 0 6px; color:var(--diamond);}
+  .req p{margin:0 0 8px; color:var(--ink-dim); font-size:20px;}
+
+  /* ── steps ── */
+  .step-row{display:grid; grid-template-columns:64px 1fr; gap:18px; align-items:start; margin:0 0 18px;}
+  .step-row .n{font-family:'Press Start 2P',monospace; font-size:18px; color:#06262a;
+    background:var(--diamond); width:64px; height:64px; display:flex; align-items:center; justify-content:center;
+    box-shadow:inset 3px 3px 0 #b6f6f0, inset -3px -3px 0 var(--diamond-dk);}
+  .step-row h3{font-size:15px; margin:6px 0 8px;}
+  .step-row p{margin:0 0 8px; color:var(--ink-dim); font-size:21px;}
+
+  /* ── copyable code block ── */
+  .code{position:relative; background:#06181a; border:3px solid var(--diamond-dk); margin:10px 0; padding:0;}
+  .code pre{margin:0; padding:16px 16px; font-family:'VT323',monospace; font-size:20px; color:#c8fff7;
+    white-space:pre-wrap; word-break:break-word; overflow-x:auto;}
+  .code .copy{position:absolute; top:8px; right:8px; cursor:pointer;
+    font-family:'Press Start 2P',monospace; font-size:9px; color:#06262a; background:var(--diamond);
+    border:none; padding:8px 10px; box-shadow:inset 2px 2px 0 #b6f6f0, inset -2px -2px 0 var(--diamond-dk);}
+  .code .copy:active{transform:translateY(2px);}
+  .code .copy.done{background:var(--emerald); color:#06210f;}
+  .hint{color:#8aa0b0; font-size:19px;}
+
+  /* ── AI prompt block ── */
+  .prompt{background:#0b1410; border:4px solid var(--emerald-dk);
+    box-shadow:inset 4px 4px 0 rgba(255,255,255,.05), inset -4px -4px 0 rgba(0,0,0,.5); position:relative;}
+  .prompt pre{margin:0; padding:22px; font-family:'VT323',monospace; font-size:21px; color:#d6ffe2;
+    white-space:pre-wrap; word-break:break-word;}
+  .prompt .copy{position:absolute; top:10px; right:10px;}
+
+  footer{background:var(--panel-edge); text-align:center; padding:40px 22px; color:var(--ink-dim);}
+  footer .pix{font-size:11px; color:var(--ink);}
+
+  @media(max-width:820px){ .grid3{grid-template-columns:1fr;} .hero h1{font-size:20px;} h2{font-size:17px;} }
+  @media(max-width:520px){ body{font-size:21px;} .step-row{grid-template-columns:1fr;} .step-row .n{width:52px;height:52px;font-size:15px;} }
+  @media(prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} }
+  .c1{animation:drift 11s ease-in-out infinite alternate;} .c2{animation:drift 14s ease-in-out infinite alternate;}
+  @keyframes drift{ from{transform:translateX(0);} to{transform:translateX(40px);} }
+</style>
+</head>
+<body>
+
+<!-- ─────────── top nav ─────────── -->
+<nav class="nav">
+  <a class="home" href="/">⛏ OMO</a>
+  <div class="right">
+    <a href="/#mechanism">How it works</a>
+    <a href="https://github.com/harrythentrepreneur/omo-minecraft" target="_blank" rel="noopener">GitHub ↗</a>
+  </div>
+</nav>
+
+<!-- ─────────── hero ─────────── -->
+<header class="hero" id="top">
+  <div class="cloud c1"></div><div class="cloud c2"></div>
+  <p class="eyebrow">▸ TRY IT YOURSELF</p>
+  <h1 class="pix-shadow">Run a self-building<br>AI org on your machine.</h1>
+  <p class="sub">Watch the demo, then clone the repo, drop in a <b>free Gemini key</b>, run <b>one command</b>,
+     and walk into Omo in Minecraft. Takes about <b>10 minutes</b>.</p>
+  <div>
+    <a class="btn ice" href="#demo">▶ Watch the demo</a>
+    <a class="btn go" href="#install">⛏ Install &amp; run</a>
+  </div>
+  <div class="badges">
+    <span class="chip">⛏ macOS</span>
+    <span class="chip">◆ Free Gemini key</span>
+    <span class="chip">◆ ~10 min</span>
+    <span class="chip">◆ Open source</span>
+  </div>
+</header>
+<div class="ground"></div>
+
+<!-- ─────────── DEMO VIDEO ─────────── -->
+<section id="demo">
+  <div class="wrap center">
+    <p class="eyebrow">SEE IT IN ACTION</p>
+    <h2 class="glow">Say one sentence. Watch the world build itself.</h2>
+    <p class="lead" style="max-width:58ch;margin:0 auto 26px;">One continuous take: drop the HQ, speak a goal,
+       a new wing rises block by block, an agent walks in, the wall lights up with live data.</p>
+
+    <div class="video-wrap">
+      <div class="slot" id="videoSlot">
+        <!-- ▶ TO ADD THE DEMO VIDEO, replace this whole .slot with ONE of:
+             1) Local file:   <video controls poster="images/hero.jpg" src="videos/demo.mp4"></video>
+             2) YouTube:      <iframe src="https://www.youtube.com/embed/VIDEO_ID" allowfullscreen></iframe>
+             Keep it inside .video-wrap so the 16:9 frame holds. -->
+        <div class="play"><span class="ring"></span><span class="tri"></span></div>
+      </div>
+      <span class="vid-cap"><b>DEMO VIDEO → coming soon.</b> Drop <b>videos/demo.mp4</b> here (or a YouTube embed) — the one-take money shot: ask → world rises → walk in → /revise → approve.</span>
+    </div>
+  </div>
+</section>
+
+<div class="turf"></div>
+
+<!-- ─────────── PREREQUISITES ─────────── -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow center">BEFORE YOU START</p>
+    <h2 class="pix-shadow center">What you'll need</h2>
+    <p class="lead center" style="max-width:60ch;margin:8px auto 30px;">Built and tested on <b>macOS (Apple Silicon)</b>.
+       On a Mac, install the toolchain with one Homebrew line — the rest is automatic.</p>
+
+    <div class="code"><button class="copy">COPY</button><pre>brew install openjdk@21 maven node python jq</pre></div>
+
+    <div class="grid3" style="margin-top:22px;">
+      <div class="panel req"><h3>◆ Java 21 + Maven</h3><p>Runs the Paper server &amp; builds the plugin.</p></div>
+      <div class="panel req"><h3>◆ Node 20+</h3><p>The runtime / orchestrator (tsx).</p></div>
+      <div class="panel req"><h3>◆ Python 3.10+</h3><p>The ADK + Gemini agent service.</p></div>
+      <div class="panel req"><h3>◆ Minecraft: Java 1.21.4</h3><p>The real game client — you play in it. <span class="hint">(minecraft.net)</span></p></div>
+      <div class="panel req"><h3>◆ Gemini API key — free</h3><p>The brain of every agent. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get one free ↗</a></p></div>
+      <div class="panel req"><h3>◆ Omo client-mod <span class="hint">(optional)</span></h3><p>Fabric mod for fullscreen in-world screens + voice. In the repo.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="turf"></div>
+
+<!-- ─────────── INSTALL / STEP BY STEP ─────────── -->
+<section id="install">
+  <div class="wrap">
+    <p class="eyebrow center">RUN IT LOCALLY</p>
+    <h2 class="glow center">Six steps to your own Omo</h2>
+    <p class="lead center" style="max-width:54ch;margin:8px auto 18px;">Copy each block. The launcher does the
+       heavy lifting — Paper download, plugin build, npm install, token wiring.</p>
+
+    <div class="center" style="margin:0 0 30px;">
+      <a class="btn gold" href="https://github.com/harrythentrepreneur/omo-minecraft" target="_blank" rel="noopener">★ View the repo on GitHub ↗</a>
+    </div>
+
+    <!-- 1 -->
+    <div class="step-row">
+      <div class="n">1</div>
+      <div>
+        <h3>Clone the repo</h3>
+        <p>Grab the code and step into it.</p>
+        <div class="code"><button class="copy">COPY</button><pre>git clone https://github.com/harrythentrepreneur/omo-minecraft.git
+cd omo-minecraft</pre></div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="step-row">
+      <div class="n">2</div>
+      <div>
+        <h3>First-time setup</h3>
+        <p>Fetches Paper, builds the plugin, installs runtime deps, and writes <span class="hint">runtime/.env</span> (with a synced bridge token).</p>
+        <div class="code"><button class="copy">COPY</button><pre>./agentcraft setup</pre></div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="step-row">
+      <div class="n">3</div>
+      <div>
+        <h3>Add your free Gemini key</h3>
+        <p>The key powers the agents <i>and</i> the world-architect, so it goes in <b>two</b> places. Paste your key in place of <span class="hint">YOUR_KEY</span>.</p>
+        <div class="code"><button class="copy">COPY</button><pre># 1) the runtime (Gemini world-architect)
+echo 'GOOGLE_API_KEY=YOUR_KEY' >> runtime/.env
+
+# 2) the ADK crew (Chief of Staff + specialists)
+mkdir -p omo-agent/omo
+cat > omo-agent/omo/.env <<'ENV'
+GOOGLE_API_KEY=YOUR_KEY
+GOOGLE_GENAI_USE_VERTEXAI=FALSE
+OMO_GEMINI_MODEL=gemini-flash-latest
+ENV
+cp omo-agent/omo/.env omo-agent/specialist/.env</pre></div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="step-row">
+      <div class="n">4</div>
+      <div>
+        <h3>Install the ADK (Gemini) crew</h3>
+        <p>A one-time Python venv for the <span class="hint">adk api_server</span>.</p>
+        <div class="code"><button class="copy">COPY</button><pre>python3 -m venv omo-agent/.venv
+omo-agent/.venv/bin/pip install google-adk</pre></div>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="step-row">
+      <div class="n">5</div>
+      <div>
+        <h3>Start everything</h3>
+        <p>Boots the ADK crew, the runtime, and the Paper server — and tails the logs. One command for the whole stack.</p>
+        <div class="code"><button class="copy">COPY</button><pre>./agentcraft</pre></div>
+        <p class="hint">Stop with <b>./agentcraft stop</b> · re-tail with <b>./agentcraft logs</b> · full restart with <b>./agentcraft restart</b>.</p>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="step-row">
+      <div class="n">6</div>
+      <div>
+        <h3>Walk in &amp; build your org</h3>
+        <p>Open <b>Minecraft Java 1.21.4</b> → Multiplayer → <b>Direct Connect</b> → <span class="hint">localhost</span>.
+           Then in chat, drop the HQ and talk to the Chief of Staff:</p>
+        <div class="code"><button class="copy">COPY</button><pre>/omo hq</pre></div>
+        <p>Walk up to the Chief of Staff and say it out loud:</p>
+        <div class="code"><button class="copy">COPY</button><pre>Check whether our ad spend is still paying off — and keep watch.</pre></div>
+        <p class="hint">A new wing rises on the path, a Gemini specialist walks in, and the wall lights up with live data. Ask for a <b>school</b> and it builds a classroom too.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="turf"></div>
+
+<!-- ─────────── AI PROMPT ─────────── -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow center">THE LAZY WAY</p>
+    <h2 class="pix-shadow center">Or just let an AI set it up</h2>
+    <p class="lead center" style="max-width:62ch;margin:8px auto 22px;">Clone the repo, open it in
+       <b>Claude Code</b> / Cursor / any terminal AI, and paste this. It walks you through every step and fixes errors as they come.</p>
+
+    <div class="prompt">
+      <button class="copy">COPY</button>
+      <pre>I want to run Omo Mission Control locally on macOS.
+Repo: https://github.com/harrythentrepreneur/omo-minecraft
+I've cloned it and I'm in the project root. Walk me through setup
+ONE step at a time, waiting for me to confirm after each:
+
+1. Check I have the prereqs (java 21, maven, node 20+, python 3.10+,
+   jq, curl). For anything missing, give me the exact `brew install`.
+2. Help me get a FREE Google AI Studio (Gemini) API key, then put it in
+   BOTH places: append GOOGLE_API_KEY to runtime/.env (the world-architect),
+   and create omo-agent/omo/.env with GOOGLE_API_KEY, GOOGLE_GENAI_USE_VERTEXAI=FALSE,
+   OMO_GEMINI_MODEL=gemini-flash-latest (copy it to omo-agent/specialist/.env too).
+3. Create the ADK venv: python3 -m venv omo-agent/.venv &&
+   omo-agent/.venv/bin/pip install google-adk
+4. Run `./agentcraft setup`, then `./agentcraft`. Watch logs/ and fix any errors.
+5. Tell me how to connect my Minecraft Java 1.21.4 client to localhost,
+   then what to type in-game: `/omo hq`, then talk to the Chief of Staff.
+
+If a command fails, read the error (and `./agentcraft logs`) and fix it
+before moving on. Keep replies short and tell me exactly what to run next.</pre>
+    </div>
+  </div>
+</section>
+
+<div class="turf"></div>
+
+<!-- ─────────── TROUBLESHOOTING ─────────── -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow center">IF SOMETHING'S OFF</p>
+    <h2 class="pix-shadow center">Quick fixes</h2>
+    <div class="grid3" style="margin-top:28px;">
+      <div class="panel req"><h3>◆ Agents say “offline”</h3><p>The ADK crew didn't start — check <span class="hint">logs/adk.log</span> and that your Gemini key is in <span class="hint">omo-agent/omo/.env</span>.</p></div>
+      <div class="panel req"><h3>◆ Buildings don't appear</h3><p>The world-architect needs <span class="hint">GOOGLE_API_KEY</span> in <span class="hint">runtime/.env</span>. A fallback pod still builds without it.</p></div>
+      <div class="panel req"><h3>◆ Can't connect in-game</h3><p>Wait for <span class="hint">paper ready on :25565</span> in the logs, then Direct Connect to <span class="hint">localhost</span>.</p></div>
+      <div class="panel req"><h3>◆ See what's running</h3><p><b>./agentcraft status</b> shows every service; <b>./agentcraft logs</b> tails them all.</p></div>
+      <div class="panel req"><h3>◆ No fullscreen screens</h3><p>That's the optional Fabric <b>client-mod</b> — build it from <span class="hint">client-mod/</span> and add it to your mods folder.</p></div>
+      <div class="panel req"><h3>◆ Start fresh</h3><p><b>./agentcraft restart</b> does a clean full restart of the whole stack.</p></div>
+    </div>
+    <div class="center" style="margin-top:34px;">
+      <a class="btn ice" href="https://github.com/harrythentrepreneur/omo-minecraft" target="_blank" rel="noopener">Full README on GitHub ↗</a>
+      <a class="btn go" href="#top">Back to top</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p class="pix">OMO MISSION CONTROL</p>
+  <p>A world that builds itself for autonomous AI teams.</p>
+  <p style="margin-top:14px;">Powered by <b>Gemini</b> · Built on <b>ADK</b> · Connected over <b>MCP</b> · Runs in <b>vanilla Minecraft</b></p>
+  <p style="margin-top:14px;">
+    <a href="/">Home</a> &nbsp;·&nbsp;
+    <a href="/architecture">Architecture</a> &nbsp;·&nbsp;
+    <a href="https://github.com/harrythentrepreneur/omo-minecraft" target="_blank" rel="noopener">GitHub</a> &nbsp;·&nbsp;
+    <a href="#top">Back to top</a>
+  </p>
+  <p style="margin-top:14px;color:#777;">© 2026 Omo · Built for the Google for Startups AI Agents Challenge — Track 1</p>
+</footer>
+
+<script>
+  // copy-to-clipboard for every .copy button (grabs the <pre> in its container)
+  document.querySelectorAll('.copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var box = btn.closest('.code, .prompt');
+      var pre = box && box.querySelector('pre');
+      if(!pre) return;
+      var text = pre.innerText;
+      function done(){ var t=btn.textContent; btn.textContent='COPIED'; btn.classList.add('done');
+        setTimeout(function(){ btn.textContent=t; btn.classList.remove('done'); },1400); }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done).catch(function(){ fallback(text,done); });
+      } else { fallback(text,done); }
+    });
+  });
+  function fallback(text,cb){
+    var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); cb(); }catch(e){} document.body.removeChild(ta);
+  }
+</script>
+
+</body>
+</html>

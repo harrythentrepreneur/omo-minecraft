@@ -230,12 +230,21 @@ public final class HqIslandBuilder {
         int doorZ = cz - (R_DRUM - 1);
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = 0; dy < 3; dy++) {
-                // Clear a couple of rings deep so the opening reads through the wall.
-                for (int back = 0; back <= 1; back++) {
+                // Clear through the outer ring (doorZ-1), the front face (doorZ) and
+                // one ring inside (doorZ+1) so the opening reads cleanly. The front
+                // drum is 2 blocks thick on the centreline, so doorZ-1 must be cleared.
+                for (int back = -1; back <= 1; back++) {
                     Block b = w.getBlockAt(cx + dx, wy + dy, doorZ + back);
                     if (b.getType() != Material.AIR) b.setType(Material.AIR, false);
                 }
             }
+        }
+        // The outer ring is proud by one block on the door centreline (dx=0,
+        // z=doorZ-1, full WALL_H tall). Clear its whole height so paving the
+        // avenue beneath it never strands a floating soffit over the doorway.
+        for (int dy = 3; dy < WALL_H; dy++) {
+            Block b = w.getBlockAt(cx, wy + dy, doorZ - 1);
+            if (b.getType() != Material.AIR) b.setType(Material.AIR, false);
         }
         // Copper-trimmed doorframe.
         for (int dy = 0; dy < 4; dy++) {

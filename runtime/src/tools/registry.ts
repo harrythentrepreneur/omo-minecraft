@@ -7,6 +7,9 @@ export type ToolContext = {
   requestApproval: (summary: string) => Promise<boolean>;
   log: (line: string, level?: "info" | "warn" | "error" | "tool") => void;
   openClassroom?: (p: { subject: string }) => void;
+  // Start a new world (host villager → plugin spawn path). Owner-explicit only.
+  startCodeWorld?: (p: { agentId: string; cwd: string; task: string }) => void;
+  startHermesWorld?: (p: { agentId: string; role: string }) => void;
 };
 
 export type ToolImpl = {

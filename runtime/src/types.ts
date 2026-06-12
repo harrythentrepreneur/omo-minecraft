@@ -223,6 +223,14 @@ export type OutboundMessage =
       playerName?: string | null;
     }
   | {
+      // Host villager (Hermes) asked to start a new Hermes world: spawn a
+      // Hermes villager with `role`. Plugin maps onto the /omo spawn path.
+      type: "spawn_hermes_request";
+      agentId: string;
+      role: string;
+      playerName?: string | null;
+    }
+  | {
       type: "despawn_agent_request";
       agentId: string;
     }
@@ -279,6 +287,10 @@ export type OutboundMessage =
       room: string;
       anchorRoom: string;
       index: number;
+      // Optional override for the back-wall screen URL. Specialist wings default
+      // to their /dash/<room> board; a SCHOOL wing passes the live /whiteboard so
+      // the tutor's lesson slides show on the wall instead of a data dashboard.
+      screenUrl?: string;
     }
   | {
       // world_consult: one function's specialist is asking another a question.

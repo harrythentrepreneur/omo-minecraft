@@ -25,7 +25,7 @@ import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { platform, homedir } from 'node:os';
 import { join } from 'node:path';
 
-const CAPTURE_PERIOD_MS = 1000;   // fallback screenshot cadence (screencast idle)
+const CAPTURE_PERIOD_MS = 400;    // fallback screenshot cadence (round-robins multi-wall foreground)
 const POLL_REGISTRY_MS  = 2000;
 const VIEWPORT_W = 1280;
 const VIEWPORT_H = 800;
@@ -37,7 +37,7 @@ const RELAUNCH_MAX_MS  = 30_000;
 // can't show more) but always ACK so Chrome keeps the stream alive.
 const SCREENCAST_QUALITY    = 60;
 const MIN_POST_INTERVAL_MS  = 33;     // ~30 fps upload — keeps the plugin's 20 Hz pull always fed
-const FALLBACK_AFTER_MS     = 1200;   // no screencast frame this long → screenshot
+const FALLBACK_AFTER_MS     = 600;    // no screencast frame this long → bring-to-front + screenshot
 const INPUT_POLL_WAIT_MS    = 500;    // long-poll window for /input drain
 
 // CDP key descriptors for the non-printable keys the in-game keyboard can
@@ -191,11 +191,24 @@ export async function startHeadlessCinema({ runtimeBase, log, warn }) {
   // screencast has gone quiet (page backgrounded behind another cinema,
   // a stalled compositor, etc.) so the wall never freezes for long.
   async function capture(id, entry) {
+    const client = entry.client;
+    if (!client) return;
     try {
-      const buf = await entry.page.screenshot({ type: 'jpeg', quality: SCREENCAST_QUALITY });
-      const body = Buffer.isBuffer(buf) ? buf : Buffer.from(buf);
+      // Raw CDP captureScreenshot renders the page's OWN renderer on demand, so
+      // it returns LIVE frames even when the tab is backgrounded behind another
+      // cinema — so several walls (HQ's 3 + every wing) all stay live at once.
+      // Crucially it does NOT touch the foreground, so the walls never "refresh"
+      // — unlike page.screenshot()+bringToFront, which round-robins the active
+      // tab and makes each page repaint as it's activated. Verified empirically:
+      // captureScreenshot(default fromSurface) = background live; fromSurface:false
+      // = background frozen; bringToFront = live but flickers. See git history.
+      const { data } = await client.send('Page.captureScreenshot', {
+        format: 'jpeg',
+        quality: SCREENCAST_QUALITY,
+      });
+      if (!data) return;
       entry.lastFrameAt = Date.now();
-      await postFrame(id, body, 'image/jpeg');
+      await postFrame(id, Buffer.from(data, 'base64'), 'image/jpeg');
     } catch (e) {
       // Page may be mid-navigation; skip this tick.
     }

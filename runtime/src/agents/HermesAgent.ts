@@ -14,6 +14,10 @@ export type AgentEvents = {
   onBuildOps: (ops: BuildOp[], clearFirst: boolean) => void;
   // Dean re-themes the classroom + re-seats the tutor for a new subject.
   onOpenClassroom?: (p: { subject: string; playerName?: string | null }) => void;
+  // A host villager starts a new world on the owner's explicit request: a
+  // Claude Code villager (onStartCodeWorld) or a Hermes villager (onStartHermesWorld).
+  onStartCodeWorld?: (p: { agentId: string; cwd: string; task: string; playerName?: string | null }) => void;
+  onStartHermesWorld?: (p: { agentId: string; role: string; playerName?: string | null }) => void;
   // Optional full, untruncated reasoning feed for the in-game terminal mirror.
   // onScreen/onTranscript are kept terse to fit the floating board + lectern
   // book; onReasoning carries the COMPLETE narration / tool I/O so a player who
@@ -217,6 +221,10 @@ export class HermesAgent {
       log: (line, level = "info") => this.events.onLog(line, level),
       openClassroom: (p) =>
         this.events.onOpenClassroom?.({ subject: p.subject, playerName: this.ownerName ?? null }),
+      startCodeWorld: (p) =>
+        this.events.onStartCodeWorld?.({ ...p, playerName: this.ownerName ?? null }),
+      startHermesWorld: (p) =>
+        this.events.onStartHermesWorld?.({ ...p, playerName: this.ownerName ?? null }),
     };
 
     try {

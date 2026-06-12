@@ -1,0 +1,313 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1720" height="1300" viewBox="0 0 1720 1300">
+<defs>
+<radialGradient id="bgg" cx="32%" cy="-8%" r="120%"><stop offset="0" stop-color="#0e1830"/><stop offset="0.55" stop-color="#060a12"/><stop offset="1" stop-color="#03060c"/></radialGradient>
+<filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="softshadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#000" flood-opacity="0.45"/></filter>
+<marker id="ah-27e7ff" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L3,5 z" fill="#27e7ff"/></marker>
+<marker id="ah-39ff88" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L3,5 z" fill="#39ff88"/></marker>
+<marker id="ah-6f8cff" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L3,5 z" fill="#6f8cff"/></marker>
+<marker id="ah-ffc24b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L3,5 z" fill="#ffc24b"/></marker>
+<marker id="ah-ff5d6c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L3,5 z" fill="#ff5d6c"/></marker>
+<marker id="ah-c9a14a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L3,5 z" fill="#c9a14a"/></marker>
+<marker id="ah-8aa0c4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L3,5 z" fill="#8aa0c4"/></marker>
+<marker id="ah-e6efff" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L3,5 z" fill="#e6efff"/></marker>
+</defs>
+<rect width="1720" height="1300" fill="url(#bgg)"/>
+<line x1="0" y1="0" x2="0" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="48" y1="0" x2="48" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="96" y1="0" x2="96" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="144" y1="0" x2="144" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="192" y1="0" x2="192" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="240" y1="0" x2="240" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="288" y1="0" x2="288" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="336" y1="0" x2="336" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="384" y1="0" x2="384" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="432" y1="0" x2="432" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="480" y1="0" x2="480" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="528" y1="0" x2="528" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="576" y1="0" x2="576" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="624" y1="0" x2="624" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="672" y1="0" x2="672" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="720" y1="0" x2="720" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="768" y1="0" x2="768" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="816" y1="0" x2="816" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="864" y1="0" x2="864" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="912" y1="0" x2="912" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="960" y1="0" x2="960" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1008" y1="0" x2="1008" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1056" y1="0" x2="1056" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1104" y1="0" x2="1104" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1152" y1="0" x2="1152" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1200" y1="0" x2="1200" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1248" y1="0" x2="1248" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1296" y1="0" x2="1296" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1344" y1="0" x2="1344" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1392" y1="0" x2="1392" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1440" y1="0" x2="1440" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1488" y1="0" x2="1488" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1536" y1="0" x2="1536" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1584" y1="0" x2="1584" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1632" y1="0" x2="1632" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="1680" y1="0" x2="1680" y2="1300" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="0" x2="1720" y2="0" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="48" x2="1720" y2="48" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="96" x2="1720" y2="96" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="144" x2="1720" y2="144" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="192" x2="1720" y2="192" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="240" x2="1720" y2="240" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="288" x2="1720" y2="288" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="336" x2="1720" y2="336" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="384" x2="1720" y2="384" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="432" x2="1720" y2="432" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="480" x2="1720" y2="480" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="528" x2="1720" y2="528" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="576" x2="1720" y2="576" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="624" x2="1720" y2="624" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="672" x2="1720" y2="672" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="720" x2="1720" y2="720" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="768" x2="1720" y2="768" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="816" x2="1720" y2="816" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="864" x2="1720" y2="864" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="912" x2="1720" y2="912" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="960" x2="1720" y2="960" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="1008" x2="1720" y2="1008" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="1056" x2="1720" y2="1056" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="1104" x2="1720" y2="1104" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="1152" x2="1720" y2="1152" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="1200" x2="1720" y2="1200" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="1248" x2="1720" y2="1248" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<line x1="0" y1="1296" x2="1720" y2="1296" stroke="#0f1b30" stroke-width="0.5" opacity="0.35"/>
+<text x="60" y="58" font-family="'Georgia', serif" font-size="34" font-weight="800" fill="#e6efff" text-anchor="start" opacity="1.0">Omo Mission Control</text>
+<text x="60" y="86" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="1.0" font-style="italic">System architecture — a world that builds itself for autonomous AI teams.</text>
+<rect x="1318.4" y="40" width="341.59999999999997" height="28" rx="14" ry="14" fill="#0d1424" stroke="#27e7ff" stroke-width="1.6" opacity="1.0" filter="url(#glow)"/>
+<circle cx="1334.4" cy="54" r="4.5" fill="#27e7ff"/>
+<text x="1346.4" y="58" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#27e7ff" text-anchor="start" opacity="1.0">MCP  ·  every tool + the self-extension surface</text>
+<rect x="1039.6000000000001" y="40" width="266.79999999999995" height="28" rx="14" ry="14" fill="#0d1424" stroke="#39ff88" stroke-width="1.6" opacity="1.0" filter="url(#glow)"/>
+<circle cx="1055.6000000000001" cy="54" r="4.5" fill="#39ff88"/>
+<text x="1067.6000000000001" y="58" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#39ff88" text-anchor="start" opacity="1.0">ADK  ·  the multi-agent organisation</text>
+<rect x="767.6000000000001" y="40" width="260.0" height="28" rx="14" ry="14" fill="#0d1424" stroke="#6f8cff" stroke-width="1.6" opacity="1.0" filter="url(#glow)"/>
+<circle cx="783.6000000000001" cy="54" r="4.5" fill="#6f8cff"/>
+<text x="795.6000000000001" y="58" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#6f8cff" text-anchor="start" opacity="1.0">Gemini  ·  the brain of every agent</text>
+<rect x="60" y="110" width="1600" height="92" rx="18" ry="18" fill="#0a101e" stroke="#22324f" stroke-width="1.4" opacity="0.65"/>
+<rect x="60" y="124" width="4" height="64" rx="2" fill="#ffc24b" opacity="0.9"/>
+<circle cx="90" cy="136" r="14" fill="#ffc24b" filter="url(#glow)"/>
+<text x="90" y="141" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="800" fill="#06101c" text-anchor="middle" opacity="1.0">1</text>
+<text x="114" y="141" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0" letter-spacing="0.4">YOU — inside an ordinary (vanilla) Minecraft world</text>
+<rect x="82" y="146" width="378" height="44" rx="12" ry="12" fill="#0d1424" stroke="#ffc24b" stroke-width="1.6" opacity="1.0"/>
+<rect x="82" y="146" width="5" height="44" rx="2.5" fill="#ffc24b"/>
+<text x="98" y="170" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Speak a goal</text>
+<text x="98" y="189" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">“Check our ad spend… keep watch.”</text>
+<rect x="482" y="146" width="378" height="44" rx="12" ry="12" fill="#0d1424" stroke="#ffc24b" stroke-width="1.6" opacity="1.0"/>
+<rect x="482" y="146" width="5" height="44" rx="2.5" fill="#ffc24b"/>
+<text x="498" y="170" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">/revise &lt;prompt&gt;</text>
+<text x="498" y="189" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">steer the live dashboard</text>
+<rect x="882" y="146" width="378" height="44" rx="12" ry="12" fill="#0d1424" stroke="#ffc24b" stroke-width="1.6" opacity="1.0"/>
+<rect x="882" y="146" width="5" height="44" rx="2.5" fill="#ffc24b"/>
+<text x="898" y="170" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Tap-to-approve</text>
+<text x="898" y="189" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">veto any outward action</text>
+<rect x="1282" y="146" width="378" height="44" rx="12" ry="12" fill="#0d1424" stroke="#ffc24b" stroke-width="1.6" opacity="1.0"/>
+<rect x="1282" y="146" width="5" height="44" rx="2.5" fill="#ffc24b"/>
+<text x="1298" y="170" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Push-to-talk  (V)</text>
+<text x="1298" y="189" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">voice → whisper.cpp → chat</text>
+<rect x="60" y="232" width="1600" height="150" rx="18" ry="18" fill="#0a101e" stroke="#22324f" stroke-width="1.4" opacity="0.65"/>
+<rect x="60" y="246" width="4" height="122" rx="2" fill="#c9a14a" opacity="0.9"/>
+<circle cx="90" cy="258" r="14" fill="#c9a14a" filter="url(#glow)"/>
+<text x="90" y="263" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="800" fill="#06101c" text-anchor="middle" opacity="1.0">2</text>
+<text x="114" y="263" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0" letter-spacing="0.4">THE WORLD — Java 21 · the only code that touches Minecraft</text>
+<rect x="82" y="278" width="778" height="86" rx="12" ry="12" fill="#0d1424" stroke="#27e7ff" stroke-width="1.6" opacity="1.0"/>
+<rect x="82" y="278" width="5" height="86" rx="2.5" fill="#27e7ff"/>
+<text x="98" y="302" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Omo client-mod  ·  Fabric</text>
+<text x="98" y="321" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">CinemaScreen — fullscreen live web dashboards (GPU-blit)</text>
+<text x="98" y="337.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">voice capture · in-world terminal screens</text>
+<text x="98" y="354.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">client-mod/src/.../terminal/</text>
+<rect x="882" y="278" width="778" height="86" rx="12" ry="12" fill="#0d1424" stroke="#c9a14a" stroke-width="1.6" opacity="1.0"/>
+<rect x="882" y="278" width="5" height="86" rx="2.5" fill="#c9a14a"/>
+<text x="898" y="302" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Paper plugin  ·  Bukkit</text>
+<text x="898" y="321" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">live parametric builds — block-by-block · villager spawn + pathing</text>
+<text x="898" y="337.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">HQ island · cinema screens · tap-to-approve UI</text>
+<text x="898" y="354.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">plugin/.../bridge/IncomingHandler.java</text>
+<rect x="60" y="412" width="1600" height="300" rx="18" ry="18" fill="#0a101e" stroke="#22324f" stroke-width="1.4" opacity="0.65"/>
+<rect x="60" y="426" width="4" height="272" rx="2" fill="#39ff88" opacity="0.9"/>
+<circle cx="90" cy="438" r="14" fill="#39ff88" filter="url(#glow)"/>
+<text x="90" y="443" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="800" fill="#06101c" text-anchor="middle" opacity="1.0">3</text>
+<text x="114" y="443" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0" letter-spacing="0.4">THE ORCHESTRATOR — Node / TypeScript runtime · single event loop</text>
+<rect x="82" y="462" width="378" height="96" rx="12" ry="12" fill="#0d1424" stroke="#39ff88" stroke-width="1.6" opacity="1.0"/>
+<rect x="82" y="462" width="5" height="96" rx="2.5" fill="#39ff88"/>
+<text x="98" y="486" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">WS Bridge</text>
+<rect x="403.0" y="472" width="45.0" height="18" rx="9" ry="9" fill="#0a1120" stroke="#39ff88" stroke-width="1.1" opacity="1.0"/>
+<text x="425.5" y="485" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="600" fill="#39ff88" text-anchor="middle" opacity="1.0">:8765</text>
+<text x="98" y="505" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">Paper ⇄ runtime</text>
+<text x="98" y="521.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">auth · broadcast()</text>
+<text x="98" y="538.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">server.ts</text>
+<rect x="482" y="462" width="378" height="96" rx="12" ry="12" fill="#0d1424" stroke="#39ff88" stroke-width="1.6" opacity="1.0"/>
+<rect x="482" y="462" width="5" height="96" rx="2.5" fill="#39ff88"/>
+<text x="498" y="486" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">AgentManager</text>
+<text x="498" y="505" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">brain select by room:</text>
+<text x="498" y="521.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">Hermes · Claude · ADK</text>
+<text x="498" y="538.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">approvals · metrics</text>
+<rect x="882" y="462" width="378" height="96" rx="12" ry="12" fill="#0d1424" stroke="#39ff88" stroke-width="1.6" opacity="1.0"/>
+<rect x="882" y="462" width="5" height="96" rx="2.5" fill="#39ff88"/>
+<text x="898" y="486" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">WorldStore</text>
+<text x="992.8" y="486" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#27e7ff" text-anchor="start" opacity="1.0">★</text>
+<text x="898" y="505" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">the live ORG GRAPH</text>
+<text x="898" y="521.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">functions + consults</text>
+<text x="898" y="538.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">worldStore.ts</text>
+<rect x="1282" y="462" width="378" height="96" rx="12" ry="12" fill="#0d1424" stroke="#27e7ff" stroke-width="1.6" opacity="1.0"/>
+<rect x="1282" y="462" width="5" height="96" rx="2.5" fill="#27e7ff"/>
+<text x="1298" y="486" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Dashboard server</text>
+<rect x="1603.0" y="472" width="45.0" height="18" rx="9" ry="9" fill="#0a1120" stroke="#27e7ff" stroke-width="1.1" opacity="1.0"/>
+<text x="1625.5" y="485" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="600" fill="#27e7ff" text-anchor="middle" opacity="1.0">:8088</text>
+<text x="1298" y="505" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">/dash/:id live boards</text>
+<text x="1298" y="521.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">+ Society View</text>
+<text x="1298" y="538.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">dashboardServer.ts</text>
+<rect x="82" y="582" width="378" height="96" rx="12" ry="12" fill="#0d1424" stroke="#27e7ff" stroke-width="1.6" opacity="1.0"/>
+<rect x="82" y="582" width="5" height="96" rx="2.5" fill="#27e7ff"/>
+<text x="98" y="606" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">omo-tools MCP</text>
+<text x="218.84" y="606" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#27e7ff" text-anchor="start" opacity="1.0">★</text>
+<rect x="403.0" y="592" width="45.0" height="18" rx="9" ry="9" fill="#0a1120" stroke="#27e7ff" stroke-width="1.1" opacity="1.0"/>
+<text x="425.5" y="605" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="600" fill="#27e7ff" text-anchor="middle" opacity="1.0">:8090</text>
+<text x="98" y="625" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">World API + Meta Ads</text>
+<text x="98" y="641.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">describe/add/build/</text>
+<text x="98" y="658.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">staff/assign/consult</text>
+<rect x="482" y="582" width="378" height="96" rx="12" ry="12" fill="#0d1424" stroke="#6f8cff" stroke-width="1.6" opacity="1.0"/>
+<rect x="482" y="582" width="5" height="96" rx="2.5" fill="#6f8cff"/>
+<text x="498" y="606" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">AdkAgent  (bridge)</text>
+<text x="498" y="625" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">ADK SSE ⇄ in-world</text>
+<text x="498" y="641.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">reasoning→screens, say,</text>
+<text x="498" y="658.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">transcript, approvals</text>
+<rect x="882" y="582" width="378" height="96" rx="12" ry="12" fill="#0d1424" stroke="#6f8cff" stroke-width="1.6" opacity="1.0"/>
+<rect x="882" y="582" width="5" height="96" rx="2.5" fill="#6f8cff"/>
+<text x="898" y="606" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">World Architect</text>
+<text x="898" y="625" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">Gemini designs each</text>
+<text x="898" y="641.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">building → build_ops</text>
+<text x="898" y="658.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">worldArchitect.ts</text>
+<rect x="1282" y="582" width="378" height="96" rx="12" ry="12" fill="#0d1424" stroke="#39ff88" stroke-width="1.6" opacity="1.0"/>
+<rect x="1282" y="582" width="5" height="96" rx="2.5" fill="#39ff88"/>
+<text x="1298" y="606" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">HTTP · Terminal</text>
+<rect x="1589.8" y="592" width="58.199999999999996" height="18" rx="9" ry="9" fill="#0a1120" stroke="#39ff88" stroke-width="1.1" opacity="1.0"/>
+<text x="1618.8999999999999" y="605" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="600" fill="#39ff88" text-anchor="middle" opacity="1.0">8766/67</text>
+<text x="1298" y="625" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">control + face API</text>
+<text x="1298" y="641.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">terminal multiplex</text>
+<text x="1298" y="658.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">http.ts · terminalServer</text>
+<rect x="60" y="742" width="1600" height="196" rx="18" ry="18" fill="#0a101e" stroke="#22324f" stroke-width="1.4" opacity="0.65"/>
+<rect x="60" y="756" width="4" height="168" rx="2" fill="#39ff88" opacity="0.9"/>
+<circle cx="90" cy="768" r="14" fill="#39ff88" filter="url(#glow)"/>
+<text x="90" y="773" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="800" fill="#06101c" text-anchor="middle" opacity="1.0">4</text>
+<text x="114" y="773" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0" letter-spacing="0.4">THE ORGANISATION — ADK service · Python · adk api_server</text>
+<rect x="82" y="790" width="470" height="110" rx="12" ry="12" fill="#0d1424" stroke="#39ff88" stroke-width="1.6" opacity="1.0"/>
+<rect x="82" y="790" width="5" height="110" rx="2.5" fill="#39ff88"/>
+<text x="98" y="814" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Chief of Staff   (Gemini)</text>
+<text x="323.0" y="814" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#27e7ff" text-anchor="start" opacity="1.0">★</text>
+<rect x="495.0" y="800" width="45.0" height="18" rx="9" ry="9" fill="#0a1120" stroke="#39ff88" stroke-width="1.1" opacity="1.0"/>
+<text x="517.5" y="813" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="600" fill="#39ff88" text-anchor="middle" opacity="1.0">:8000</text>
+<text x="98" y="833" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">ADK coordinator — reasons, then DELEGATES</text>
+<text x="98" y="849.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">sub_agents=[Growth, Comms] · transfer_to_agent</text>
+<text x="98" y="866.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#27e7ff" text-anchor="start" opacity="0.95">extends the org via the World API (MCP)</text>
+<text x="98" y="882.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">omo-agent/omo/agent.py</text>
+<rect x="300" y="802" width="152.8" height="22" rx="11" ry="11" fill="#0a1120" stroke="#6f8cff" stroke-width="1.3" opacity="1.0"/>
+<circle cx="312" cy="813" r="3.4" fill="#6f8cff"/>
+<text x="321" y="817" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#6f8cff" text-anchor="start" opacity="1.0">gemini-flash-latest</text>
+<rect x="574" y="790" width="354" height="76" rx="12" ry="12" fill="#0d1424" stroke="#6f8cff" stroke-width="1.6" opacity="1.0"/>
+<rect x="574" y="790" width="5" height="76" rx="2.5" fill="#6f8cff"/>
+<text x="590" y="814" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Growth  (Gemini)</text>
+<text x="590" y="833" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">REAL Meta Ads</text>
+<text x="590" y="849.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">ROAS · spend · CTR</text>
+<rect x="950" y="790" width="354" height="76" rx="12" ry="12" fill="#0d1424" stroke="#6f8cff" stroke-width="1.6" opacity="1.0"/>
+<rect x="950" y="790" width="5" height="76" rx="2.5" fill="#6f8cff"/>
+<text x="966" y="814" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Comms  (Gemini)</text>
+<text x="966" y="833" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">drafts — gated</text>
+<text x="966" y="849.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">onboarding · outreach</text>
+<rect x="1326" y="790" width="354" height="76" rx="12" ry="12" fill="#0d1424" stroke="#39ff88" stroke-width="1.6" opacity="1.0"/>
+<rect x="1326" y="790" width="5" height="76" rx="2.5" fill="#39ff88"/>
+<text x="1342" y="814" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Specialist ×N</text>
+<text x="1342" y="833" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#e6efff" text-anchor="start" opacity="0.95">hired on demand</text>
+<text x="1342" y="849.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">adopts any role</text>
+<text x="574" y="890" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="1.0" font-style="italic">tools = McpToolset(StreamableHTTP) → omo-tools  ·  one reusable specialist app makes the org extensible to ANY function</text>
+<rect x="60" y="968" width="1600" height="150" rx="18" ry="18" fill="#0a101e" stroke="#22324f" stroke-width="1.4" opacity="0.65"/>
+<rect x="60" y="982" width="4" height="122" rx="2" fill="#27e7ff" opacity="0.9"/>
+<circle cx="90" cy="994" r="14" fill="#27e7ff" filter="url(#glow)"/>
+<text x="90" y="999" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="800" fill="#06101c" text-anchor="middle" opacity="1.0">5</text>
+<text x="114" y="999" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0" letter-spacing="0.4">THE OUTSIDE WORLD — every tool over MCP · Gemini is the brain</text>
+<rect x="82" y="1016" width="378" height="80" rx="12" ry="12" fill="#0d1424" stroke="#27e7ff" stroke-width="1.6" opacity="1.0"/>
+<rect x="82" y="1016" width="5" height="80" rx="2.5" fill="#27e7ff"/>
+<text x="98" y="1040" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Meta Ads Graph API</text>
+<text x="98" y="1059" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#39ff88" text-anchor="start" opacity="0.95">LIVE — real campaigns + insights</text>
+<text x="98" y="1075.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">reached via the runtime's MCP</text>
+<rect x="482" y="1016" width="378" height="80" rx="12" ry="12" fill="#0d1424" stroke="#6f8cff" stroke-width="1.6" opacity="1.0"/>
+<rect x="482" y="1016" width="5" height="80" rx="2.5" fill="#6f8cff"/>
+<text x="498" y="1040" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Gemini API</text>
+<text x="498" y="1059" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#39ff88" text-anchor="start" opacity="0.95">LIVE — brain of every agent</text>
+<text x="498" y="1075.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">+ the world architect</text>
+<rect x="882" y="1016" width="378" height="80" rx="12" ry="12" fill="#0d1424" stroke="#ff5d6c" stroke-width="1.6" opacity="1.0" stroke-dasharray="6 4"/>
+<rect x="882" y="1016" width="5" height="80" rx="2.5" fill="#ff5d6c"/>
+<text x="898" y="1040" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Google Workspace MCP</text>
+<text x="898" y="1059" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#ff5d6c" text-anchor="start" opacity="0.95">ROADMAP — Gmail / Drive</text>
+<text x="898" y="1075.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">Google's own MCP server</text>
+<rect x="1282" y="1016" width="378" height="80" rx="12" ry="12" fill="#0d1424" stroke="#ff5d6c" stroke-width="1.6" opacity="1.0" stroke-dasharray="6 4"/>
+<rect x="1282" y="1016" width="5" height="80" rx="2.5" fill="#ff5d6c"/>
+<text x="1298" y="1040" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">Stripe MCP</text>
+<text x="1298" y="1059" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#ff5d6c" text-anchor="start" opacity="0.95">ROADMAP — payments</text>
+<text x="1298" y="1075.5" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.7" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.95">worlds-as-businesses</text>
+<line x1="476.0" y1="202" x2="476.0" y2="232" stroke="#ffc24b" stroke-width="2.6" marker-end="url(#ah-ffc24b)" marker-start="url(#ah-ffc24b)" stroke-linecap="round"/>
+<rect x="393.2" y="207.0" width="165.60000000000002" height="20" rx="10" ry="10" fill="#060a12" stroke="#ffc24b" stroke-width="1.1" opacity="1.0"/>
+<text x="476.0" y="221.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.8" font-weight="600" fill="#ffc24b" text-anchor="middle" opacity="1.0">talk · /revise · approve</text>
+<circle cx="380.0" cy="217.0" r="11" fill="#060a12" stroke="#ffc24b" stroke-width="2"/>
+<text x="380.0" y="221.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="800" fill="#ffc24b" text-anchor="middle" opacity="1.0">1</text>
+<line x1="700.0" y1="382" x2="700.0" y2="412" stroke="#39ff88" stroke-width="2.8" marker-end="url(#ah-39ff88)" marker-start="url(#ah-39ff88)" stroke-linecap="round"/>
+<rect x="617.2" y="387.0" width="165.60000000000002" height="20" rx="10" ry="10" fill="#060a12" stroke="#39ff88" stroke-width="1.1" opacity="1.0"/>
+<text x="700.0" y="401.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.8" font-weight="600" fill="#39ff88" text-anchor="middle" opacity="1.0">WebSocket :8765 (bridge)</text>
+<circle cx="608.0" cy="397.0" r="11" fill="#060a12" stroke="#39ff88" stroke-width="2"/>
+<text x="608.0" y="401.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="800" fill="#39ff88" text-anchor="middle" opacity="1.0">2</text>
+<line x1="1052.0" y1="412" x2="1052.0" y2="382" stroke="#27e7ff" stroke-width="2.2" stroke-dasharray="7 5" marker-end="url(#ah-27e7ff)" stroke-linecap="round"/>
+<rect x="953.2" y="387.0" width="197.60000000000002" height="20" rx="10" ry="10" fill="#060a12" stroke="#27e7ff" stroke-width="1.1" opacity="1.0"/>
+<text x="1052.0" y="401.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.8" font-weight="600" fill="#27e7ff" text-anchor="middle" opacity="1.0">HTTP /dash/:id → CinemaScreen</text>
+<circle cx="1144.0" cy="397.0" r="11" fill="#060a12" stroke="#27e7ff" stroke-width="2"/>
+<text x="1144.0" y="401.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="800" fill="#27e7ff" text-anchor="middle" opacity="1.0">8</text>
+<line x1="671.0" y1="678" x2="671.0" y2="700.0" stroke="#6f8cff" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M 671.0 700.0 Q 671.0 724.0 373.4 742" fill="none" stroke="#6f8cff" stroke-width="2.6" marker-end="url(#ah-6f8cff)" stroke-linecap="round"/>
+<rect x="577.0" y="692.0" width="204.0" height="20" rx="10" ry="10" fill="#060a12" stroke="#6f8cff" stroke-width="1.1" opacity="1.0"/>
+<text x="679.0" y="706.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.8" font-weight="600" fill="#6f8cff" text-anchor="middle" opacity="1.0">HTTP /run_sse · live cognition</text>
+<circle cx="821.0" cy="704.0" r="11" fill="#060a12" stroke="#6f8cff" stroke-width="2"/>
+<text x="821.0" y="708.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="800" fill="#6f8cff" text-anchor="middle" opacity="1.0">3</text>
+<line x1="223.0" y1="742" x2="223.0" y2="718.0" stroke="#27e7ff" stroke-width="3.2" stroke-linecap="round"/>
+<path d="M 223.0 718.0 Q 223.0 696.0 271.0 678" fill="none" stroke="#27e7ff" stroke-width="3.2" marker-end="url(#ah-27e7ff)" stroke-linecap="round"/>
+<rect x="160.2" y="692.0" width="229.60000000000002" height="20" rx="10" ry="10" fill="#060a12" stroke="#27e7ff" stroke-width="1.1" opacity="1.0"/>
+<text x="275.0" y="706.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.8" font-weight="600" fill="#27e7ff" text-anchor="middle" opacity="1.0">MCP · World API (self-extension) ★</text>
+<circle cx="121.0" cy="704.0" r="11" fill="#060a12" stroke="#27e7ff" stroke-width="2"/>
+<text x="121.0" y="708.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="800" fill="#27e7ff" text-anchor="middle" opacity="1.0">4</text>
+<path d="M 1071.0 582 L 1071.0 576 L 1271.0 576 L 1271.0 394 L 1271.0 394 L 1271.0 382" fill="none" stroke="#c9a14a" stroke-width="2.4" marker-end="url(#ah-c9a14a)" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1178.6" y="473.0" width="184.8" height="20" rx="10" ry="10" fill="#060a12" stroke="#c9a14a" stroke-width="1.1" opacity="1.0"/>
+<text x="1271.0" y="487.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.8" font-weight="600" fill="#c9a14a" text-anchor="middle" opacity="1.0">build_ops — room rises live</text>
+<circle cx="1341.0" cy="404" r="11" fill="#060a12" stroke="#c9a14a" stroke-width="2"/>
+<text x="1341.0" y="408" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="800" fill="#c9a14a" text-anchor="middle" opacity="1.0">5</text>
+<text x="1271.0" y="422" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#27e7ff" text-anchor="middle" opacity="1.0">+ world_staff → a specialist walks in (6)</text>
+<path d="M 106 968 L 106 954 L 38 954 L 38 694 L 106 694 L 106 678" fill="none" stroke="#27e7ff" stroke-width="2.4" marker-end="url(#ah-27e7ff)" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="32" y="823.0" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#27e7ff" text-anchor="middle" transform="rotate(-90 32 823.0)">Graph API · live data</text>
+<circle cx="106" cy="928" r="11" fill="#060a12" stroke="#27e7ff" stroke-width="2"/>
+<text x="106" y="932" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="800" fill="#27e7ff" text-anchor="middle" opacity="1.0">7</text>
+<line x1="671.0" y1="968" x2="671.0" y2="938" stroke="#6f8cff" stroke-width="2.6" marker-end="url(#ah-6f8cff)" stroke-linecap="round"/>
+<rect x="610.6" y="945.0" width="120.80000000000001" height="20" rx="10" ry="10" fill="#060a12" stroke="#6f8cff" stroke-width="1.1" opacity="1.0"/>
+<text x="671.0" y="959.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.8" font-weight="600" fill="#6f8cff" text-anchor="middle" opacity="1.0">model API · brain</text>
+<line x1="1071.0" y1="968" x2="1071.0" y2="938" stroke="#ff5d6c" stroke-width="2.0" stroke-dasharray="7 5" marker-end="url(#ah-ff5d6c)" stroke-linecap="round"/>
+<line x1="1471.0" y1="968" x2="1471.0" y2="938" stroke="#ff5d6c" stroke-width="2.0" stroke-dasharray="7 5" marker-end="url(#ah-ff5d6c)" stroke-linecap="round"/>
+<rect x="1223.4" y="945.0" width="95.2" height="20" rx="10" ry="10" fill="#060a12" stroke="#ff5d6c" stroke-width="1.1" opacity="1.0"/>
+<text x="1271.0" y="959.0" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.8" font-weight="600" fill="#ff5d6c" text-anchor="middle" opacity="1.0">MCP (roadmap)</text>
+<rect x="60" y="1142" width="1600" height="78" rx="16" ry="16" fill="#0d1424" stroke="#22324f" stroke-width="1.4" opacity="1.0"/>
+<text x="82" y="1170" font-family="'Georgia', serif" font-size="15" font-weight="700" fill="#e6efff" text-anchor="start" opacity="1.0">The self-extension loop</text>
+<text x="82" y="1192" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="1.0" font-style="italic">You state intent — the org declares the function it needs and the world materialises it. No human pre-wires a thing:</text>
+<text x="82" y="1210" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#27e7ff" text-anchor="start" opacity="1.0">world_describe  →  world_add_function  →  world_build  →  world_staff  →  world_assign   ( + world_consult: agents ask each other )</text>
+<circle cx="1190" cy="1160" r="4.5" fill="#6f8cff"/>
+<text x="1202" y="1164" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.3" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="1.0">Gemini — the brain</text>
+<circle cx="1425" cy="1160" r="4.5" fill="#39ff88"/>
+<text x="1437" y="1164" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.3" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="1.0">ADK / runtime</text>
+<circle cx="1190" cy="1179" r="4.5" fill="#27e7ff"/>
+<text x="1202" y="1183" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.3" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="1.0">MCP — connect + extend</text>
+<circle cx="1425" cy="1179" r="4.5" fill="#ffc24b"/>
+<text x="1437" y="1183" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.3" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="1.0">Human-in-the-loop</text>
+<circle cx="1190" cy="1198" r="4.5" fill="#ff5d6c"/>
+<text x="1202" y="1202" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.3" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="1.0">Roadmap (dashed)</text>
+<circle cx="1425" cy="1198" r="4.5" fill="#c9a14a"/>
+<text x="1437" y="1202" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.3" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="1.0">Minecraft / Java</text>
+<text x="60" y="1282" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#8aa0c4" text-anchor="start" opacity="0.7">Generated from the codebase · solid = built today · dashed = roadmap   ·   omo-mc</text>
+<text x="1660" y="1282" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#e6efff" text-anchor="end" opacity="0.9" font-style="italic">Gemini reasons · ADK orchestrates · MCP connects — including the org's own growth.</text>
+</svg>

@@ -5,6 +5,7 @@ import { metaAdsTools } from "./metaAds.js";
 import { notesTools } from "./notes.js";
 import { spotifyTools } from "./spotify.js";
 import { openClassroomTool } from "./dean.js";
+import { startCodeWorldTool, startHermesWorldTool } from "./worlds.js";
 import { presentSlideTool, whiteboardWriteTool, showSlideTool, readDeckTool } from "./classroom.js";
 import type { RoomKind } from "../agents/prompts.js";
 
@@ -35,6 +36,10 @@ export function buildRegistryForRoom(kind: RoomKind): ToolRegistry {
     for (const t of gmailTools) reg.register(t);
     for (const t of metaAdsTools) reg.register(t);
     for (const t of spotifyTools) reg.register(t);
+    // A host villager can start a new Claude Code / Hermes world on explicit
+    // request — our app's structure doing what the Gemini Chief of Staff does.
+    reg.register(startCodeWorldTool);
+    reg.register(startHermesWorldTool);
   }
   return reg;
 }

@@ -23,8 +23,13 @@ import type { ToolContext } from "./tools/registry.js";
 import { listCampaignsTool, insightsTool } from "./tools/metaAds.js";
 import { designStructure } from "./worldArchitect.js";
 import { setDashboardData, getDashboardData } from "./dashboardServer.js";
+import { ensureDeck } from "./classroom/deck.js";
 
 const MCP_PORT = Number(process.env.OMO_MCP_PORT ?? 8090);
+// The live lesson whiteboard (runtime HTTP server). A school wing points its
+// back-wall screen here instead of /dash/<room> so the tutor's slides show.
+const HTTP_PORT = Number(process.env.AGENTCRAFT_HTTP_PORT ?? 8766);
+const WHITEBOARD_URL = `http://127.0.0.1:${HTTP_PORT}/whiteboard`;
 
 type TextResult = { content: { type: "text"; text: string }[] };
 function ok(obj: unknown): TextResult {
@@ -89,6 +94,7 @@ function buildMcpServer(manager: AgentManager, world: WorldStore): McpServer {
           tools: f.tools,
           room: f.room,
           staffed: f.staffed,
+          kind: f.kind,
         })),
         note: world.list().length
           ? undefined
@@ -191,6 +197,96 @@ function buildMcpServer(manager: AgentManager, world: WorldStore): McpServer {
       const agent = manager.get(fn.agentId);
       if (agent) void agent.handleMessage(world.owner, task);
       return ok({ ok: true, assigned_to: fn.role, task, note: "the specialist is on it in their room" });
+    },
+  );
+
+  // ── world_build_school — an on-demand SCHOOL on the street ─────────────────
+  // The school is special: instead of a data dashboard + a Gemini specialist, the
+  // wing gets a LIVE TUTOR ("ada", the classroom brain) and a lesson WHITEBOARD on
+  // the back wall. One compound tool builds + staffs it (and re-themes the single
+  // school if one already exists), so the Chief of Staff just calls it whenever the
+  // owner wants to learn something. The schoolhouse still rises on the street,
+  // block-by-block, exactly like every other function.
+  server.registerTool(
+    "world_build_school",
+    {
+      title: "Build (or re-theme) a school on the street",
+      description:
+        "Stand up an on-demand SCHOOL to teach the owner a subject: a schoolhouse rises live on the street near HQ, a live tutor ('ada') is seated, and the back wall becomes a live WHITEBOARD the tutor writes lesson slides onto. Call this whenever the owner wants to LEARN something or asks for a school / class / lesson / tutor (e.g. 'teach me Spanish', 'I want to learn chess openings', 'build a school for World War II'). If a school already exists, this RE-THEMES it for the new subject — it never builds a second school.",
+      inputSchema: {
+        subject: z
+          .string()
+          .describe("the subject to teach, e.g. 'Spanish', 'World War II', 'chess openings'"),
+      },
+    },
+    async ({ subject }) => {
+      const subj = (subject || "").trim() || "Algebra";
+      const tutorRole = `${subj} tutor`;
+      const purpose = `On-demand school teaching ${subj} — a live tutor and a lesson whiteboard.`;
+      // Kick off the slide deck immediately so the whiteboard is already preparing
+      // (idempotent with the classroom brain's own spawn-time ensureDeck).
+      ensureDeck(subj);
+
+      // Re-theme the single existing school in place: new deck, same building/tutor.
+      const existing = world.get("school");
+      if (existing) {
+        existing.role = tutorRole;
+        existing.purpose = purpose;
+        return ok({
+          ok: true,
+          retheme: true,
+          subject: subj,
+          room: existing.room,
+          note: `the school is now teaching ${subj} — the whiteboard is refreshing; walk in and talk to ada`,
+        });
+      }
+
+      // New school. room "classroom" → roomKindFromName → the classroom (tutor)
+      // brain, NOT the ADK specialist. Tutor villager id "ada" by convention.
+      const fn = world.addFunction({
+        id: "school",
+        role: tutorRole,
+        purpose,
+        room: "classroom",
+        kind: "school",
+      });
+      const tutorId = "ada";
+
+      // 1) Allocate the plot + extend the street to it (plugin), like any wing.
+      manager.broadcast({
+        type: "world_build_request",
+        room: fn.room,
+        anchorRoom: world.hqRoom,
+        index: fn.index,
+        role: "School",
+      });
+      // 2) Gemini designs a schoolhouse, streamed live onto the plot.
+      void designStructure(
+        "School",
+        `A welcoming schoolhouse classroom for teaching ${subj} — an open room with a big front board.`,
+      )
+        .then(({ ops }) => {
+          if (ops.length) manager.broadcast({ type: "build_ops", agentId: fn.room, clearFirst: true, ops });
+        })
+        .catch(() => {});
+      // 3) Seat the live tutor + raise the WHITEBOARD on the back wall (screenUrl
+      //    override) instead of a data dashboard.
+      world.markStaffed(fn.id, tutorId);
+      manager.broadcast({
+        type: "world_staff_request",
+        agentId: tutorId,
+        role: tutorRole,
+        room: fn.room,
+        anchorRoom: world.hqRoom,
+        index: fn.index,
+        screenUrl: WHITEBOARD_URL,
+      });
+      return ok({
+        ok: true,
+        built: fn.room,
+        subject: subj,
+        note: `raising a ${subj} school on the street and seating ada — walk in and start talking to learn`,
+      });
     },
   );
 

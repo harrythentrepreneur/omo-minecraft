@@ -291,6 +291,21 @@ export class AgentManager {
           subject: p.subject,
           playerName: p.playerName ?? opts.ownerName ?? null,
         }),
+      onStartCodeWorld: (p) =>
+        this.send({
+          type: "spawn_code_request",
+          agentId: p.agentId,
+          cwd: p.cwd,
+          task: p.task,
+          playerName: p.playerName ?? opts.ownerName ?? null,
+        }),
+      onStartHermesWorld: (p) =>
+        this.send({
+          type: "spawn_hermes_request",
+          agentId: p.agentId,
+          role: p.role,
+          playerName: p.playerName ?? opts.ownerName ?? null,
+        }),
     };
 
     let agent: Agent;

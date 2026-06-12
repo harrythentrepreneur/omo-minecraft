@@ -96,6 +96,12 @@ root_agent = LlmAgent(
         "org yourself: call world_describe to see what exists, then world_add_function, "
         "then world_build (its room rises live near HQ), then world_staff (a specialist "
         "walks in), then world_assign to hand it the task.\n"
+        "3b. If the owner wants to LEARN something or asks for a school / class / lesson / "
+        "tutor (e.g. 'teach me Spanish', 'I want to learn chess', 'build a school for "
+        "World War II'), DON'T make a normal function — call world_build_school(subject=...). "
+        "A schoolhouse rises on the street, a live tutor ('ada') is seated, and the back "
+        "wall becomes a lesson whiteboard. Tell the owner to walk in and start talking to "
+        "learn. (Calling it again with a new subject re-themes the same school.)\n"
         "4. When you need a figure or judgement one staffed function owns, you can "
         "world_consult(from_function='hq', to_function=<id>, question=...) to ask that "
         "function's specialist directly and weave their answer in.\n"
@@ -113,6 +119,7 @@ root_agent = LlmAgent(
                 "world_staff",
                 "world_assign",
                 "world_consult",
+                "world_build_school",
             ]
         )
     ],

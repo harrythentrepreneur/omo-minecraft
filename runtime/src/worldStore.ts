@@ -15,6 +15,9 @@ export type OmoFunction = {
   staffed: boolean;
   agentId?: string;
   dashboardId: string;
+  // "specialist" = a normal Gemini function with a data dashboard. "school" = an
+  // on-demand classroom: a live tutor + a lesson whiteboard instead of a board.
+  kind: "specialist" | "school";
   createdAt: number;
 };
 
@@ -48,8 +51,15 @@ export class WorldStore {
     return this.functions.get(id);
   }
 
-  addFunction(p: { role: string; purpose: string; tools?: string[] }): OmoFunction {
-    const id = slug(p.role);
+  addFunction(p: {
+    role: string;
+    purpose: string;
+    tools?: string[];
+    id?: string;
+    room?: string;
+    kind?: OmoFunction["kind"];
+  }): OmoFunction {
+    const id = p.id ?? slug(p.role);
     const existing = this.functions.get(id);
     if (existing) return existing;
     const fn: OmoFunction = {
@@ -57,10 +67,13 @@ export class WorldStore {
       role: p.role,
       purpose: p.purpose,
       tools: p.tools ?? [],
-      room: `fn-${id}`,
+      // A school routes to the classroom brain, so its room must read as a
+      // classroom to roomKindFromName (not "fn-…", which routes to the ADK).
+      room: p.room ?? `fn-${id}`,
       index: this.functions.size,
       staffed: false,
       dashboardId: id,
+      kind: p.kind ?? "specialist",
       createdAt: Date.now(),
     };
     this.functions.set(id, fn);

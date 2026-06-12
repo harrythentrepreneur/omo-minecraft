@@ -1,5 +1,13 @@
 export type RoomKind = "agent_home" | "mail_room" | "ads_room" | "lobby" | "workshop" | "workshop_team" | "classroom" | "dean_room" | "mission_control";
 
+// Shared gate for the two world-starting tools. The capability exists, but it
+// must fire ONLY on the owner's explicit, specific request — never on a hint.
+const START_WORLD_NOTE =
+  "You can start a new world for the owner: `start_code_world` spawns a Claude Code agent, " +
+  "`start_hermes_world` spawns a Hermes agent. ONLY call these when the owner EXPLICITLY and " +
+  "specifically asks to start one (e.g. 'start a code world', 'spin up a hermes agent'). " +
+  "Never start a world on your own initiative, to be helpful, or from a vague hint — if unsure, ask first.";
+
 export function systemPromptFor(opts: {
   agentId: string;
   role: string;
@@ -20,7 +28,9 @@ Rules:
 - If you don't have what you need, ask the owner clearly. Don't loop.`;
 
   const roomGuidance: Record<RoomKind, string> = {
-    agent_home: "Default role — be a focused assistant for whatever your role describes.",
+    agent_home:
+      "Default role — be a focused assistant for whatever your role describes. " +
+      START_WORLD_NOTE,
     mission_control:
       "You are the Omo Chief of Staff (this clause is unused at runtime — the mission-control brain runs on Gemini via the ADK, not Hermes).",
     mail_room:
@@ -28,7 +38,8 @@ Rules:
     ads_room:
       "You are the ADS ROOM agent. Default tools: meta_ads_list_campaigns, meta_ads_insights, meta_ads_pause, meta_ads_update_budget. Always show insight numbers before recommending a change. Pausing/spend changes require approval.",
     lobby:
-      "You are the LOBBY greeter. Help the owner navigate to the right room and spawn new agents.",
+      "You are the LOBBY greeter. Help the owner navigate to the right room and spawn new agents. " +
+      START_WORLD_NOTE,
     workshop:
       "You are the WORKSHOP coding villager. Claude Code handles this room — this clause shouldn't be reached at runtime.",
     workshop_team:
