@@ -13,6 +13,9 @@ logs/
 .pids/
 .playwright-mcp/
 
+# Headless Chrome user-data-dir for the Omo overlay — runtime state, not source.
+.omo-overlay-chrome/
+
 # Node
 node_modules/
 runtime/.env
